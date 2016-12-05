@@ -22,7 +22,21 @@ public class MongoDB {
 		reviewsCol.insertOne(doc);
 	}
 	
-	// Return reviews from reviews collection
+	// Return all reviews for product ID
+	public FindIterable<Document> retrieveProductReviews(String pid) {
+		FindIterable<Document> iterable = database.getCollection("reviews").find(new Document("pid", pid));
+		
+		return iterable;
+	}
+	
+	// Return all reviews by user ID
+	public FindIterable<Document> retrieveUserReviews(String userid) {
+		FindIterable<Document> iterable = database.getCollection("reviews").find(new Document("userid", userid));
+		
+		return iterable;
+	}
+	
+	// Return all reviews from reviews collection
 	public FindIterable<Document> retrieveReviewsCollection() {
 		FindIterable<Document> iterable = database.getCollection("reviews").find();
 		

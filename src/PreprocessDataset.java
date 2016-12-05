@@ -18,7 +18,7 @@ public class PreprocessDataset {
 		
 		try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
 		    String line;
-		    int count = 1;
+		    
 		    while ((line = br.readLine()) != null) {
 		    	// Process the line
 		    	String[] lineTokens = line.split("\\t");
@@ -28,30 +28,6 @@ public class PreprocessDataset {
 		    	String creationDate = lineTokens[2];
 		    	String rating = lineTokens[5];
 		    	String reviewText = lineTokens[7].trim();
-		    	
-//		    	String reviewerId = "", productId = "", creationDate = "", rating = "", reviewText = "";
-//		    	
-//		    	reviewerId = lineTokens[0];
-//		    	
-//		    	if (lineTokens.length < 2)
-//		    		System.out.println("Problem in line " + count);
-//		    	else
-//		    		productId = lineTokens[1];
-//		    	
-//		    	if (lineTokens.length < 3)
-//		    		System.out.println("Problem in line " + count);
-//		    	else
-//		    		creationDate = lineTokens[2];
-//		    	
-//		    	if (lineTokens.length < 6)
-//		    		System.out.println("Problem in line " + count);
-//		    	else
-//		    		rating = lineTokens[5];
-//		    	
-//		    	if (lineTokens.length < 8)
-//		    		System.out.println("Problem in line " + count);
-//		    	else
-//		    		reviewText = lineTokens[7].trim();
 		    	
 		    	/* Display review information
 		    	System.out.println("--------------------------------------------------------");
@@ -70,8 +46,6 @@ public class PreprocessDataset {
 		    	review.put("content", reviewText);
 		    	
 		    	mongo.insertReview(review);
-		    	
-		    	count++;
 		    	
 		    }
 		} catch (IOException e) {
