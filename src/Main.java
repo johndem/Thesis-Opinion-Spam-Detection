@@ -20,7 +20,7 @@ public class Main {
 		classifier.classifyReviews();
 		*/
 		
-		RatingDeviation rd = new RatingDeviation();
+		RatingDeviation rd = new RatingDeviation(5);
 		rd.analyzeRating();
 		
 	}
