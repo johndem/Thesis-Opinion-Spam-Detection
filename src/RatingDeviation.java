@@ -28,7 +28,7 @@ public class RatingDeviation extends SpamDetector {
 				System.out.println(rating);
 				meanRating = meanRating + rating;
 				numOfReviews++;
-				reviewList.add(new Review(numOfReviews, rating));
+				reviewList.add(new Review(numOfReviews, rating, ""));
 			}
 		});
 		
@@ -45,17 +45,17 @@ public class RatingDeviation extends SpamDetector {
 			System.out.println("Rating " + rating + " has a deviation of " + deviation + " (norm. " + normalDeviation + ")");
 		}
 		
-		FindIterable<Document> iterable = mongo.retrieveProductReviews("B000059H9C");
-		iterable.forEach(new Block<Document>() {
-			@Override
-			public void apply(final Document document) {
-				double rating = Double.parseDouble(document.get("rating").toString());
-				meanRating = (meanRating - rating) / (numOfReviews - 1);
-				double deviation = Math.abs(meanRating - rating);
-				double normalDeviation = deviation / (scale-1);
-				System.out.println("Rating " + rating + " has a deviation of " + deviation + " (norm. " + normalDeviation + ")");
-			}
-		});
+//		FindIterable<Document> iterable = mongo.retrieveProductReviews("B000059H9C");
+//		iterable.forEach(new Block<Document>() {
+//			@Override
+//			public void apply(final Document document) {
+//				double rating = Double.parseDouble(document.get("rating").toString());
+//				meanRating = (meanRating - rating) / (numOfReviews - 1);
+//				double deviation = Math.abs(meanRating - rating);
+//				double normalDeviation = deviation / (scale-1);
+//				System.out.println("Rating " + rating + " has a deviation of " + deviation + " (norm. " + normalDeviation + ")");
+//			}
+//		});
 	}
 
 }

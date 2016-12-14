@@ -20,8 +20,14 @@ public class Main {
 		classifier.classifyReviews();
 		*/
 		
+		/*
+		// Calculate rating deviation of each review on a 5-star rating system
 		RatingDeviation rd = new RatingDeviation(5);
 		rd.analyzeRating();
+		*/
+		
+		BurstPattern bp = new BurstPattern();
+		bp.detectBurstPatters();
 		
 	}
 
