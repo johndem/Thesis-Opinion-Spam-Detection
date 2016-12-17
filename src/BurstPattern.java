@@ -33,32 +33,37 @@ public class BurstPattern extends SpamDetector {
 		
 		len = 0;
 		dt = 14;
+	}
+	
+	public void detectBurstPatters() {
 		
-//		FindIterable<Document> iterable = mongo.retrieveProductReviews("B000059H9C");
-//		iterable.forEach(new Block<Document>() {
-//			@Override
-//			public void apply(final Document document) {
-//				double rating = Double.parseDouble(document.get("rating").toString());
-//				String creationDate = document.get("date").toString();
-//				numOfReviews++;
-//				reviewList.add(new Review(numOfReviews, rating, creationDate));
-//			}
-//		});
-		
-//		try{
-//		    PrintWriter writer = new PrintWriter("burstest.txt", "UTF-8");
-//		    
-//		    for (Review review : reviewList) {
-//		    	writer.println(review.getId() + "\t" + review.getRating() + "\t" + review.getDate());
-//		    }
-//		    
-//		    writer.close();
-//		} catch (IOException e) {
-//		   // do something
-//		}
+		/*
+		// Read product reviews from database and write in file
+		FindIterable<Document> iterable = mongo.retrieveProductReviews("1400046610");
+		iterable.forEach(new Block<Document>() {
+			@Override
+			public void apply(final Document document) {
+				double rating = Double.parseDouble(document.get("rating").toString());
+				String creationDate = document.get("date").toString();
+				numOfReviews++;
+				reviewList.add(new TestReview(numOfReviews, rating, creationDate));
+			}
+		});
+		try{
+		    PrintWriter writer = new PrintWriter("burstest1400046610.txt", "UTF-8");
+		    
+		    for (TestReview review : reviewList) {
+		    	writer.println(review.getId() + "\t" + review.getRating() + "\t" + review.getDate());
+		    }
+		    
+		    writer.close();
+		} catch (IOException e) {
+		   // do something
+		}
+		*/
 		
 		// Read reviews for a specific product and store in a List
-		try (BufferedReader br = new BufferedReader(new FileReader("burstest.txt"))) {
+		try (BufferedReader br = new BufferedReader(new FileReader("burstest1400046610.txt"))) {
 		    String line;
 		    
 		    while ((line = br.readLine()) != null) {
@@ -88,14 +93,13 @@ public class BurstPattern extends SpamDetector {
 			      return o1.getDate().compareTo(o2.getDate());
 			  }
 		});
-	}
-	
-	public void detectBurstPatters() {
+		
 
 		// Display product reviews
 		for (Review review : reviewList) {
 	    	System.out.println(review.getId() + "\t" + review.getRating() + "\t" + review.getDate());
 	    }
+		
 		
 		len = (int) ChronoUnit.DAYS.between(reviewList.get(0).getDate(), reviewList.get(reviewList.size()-1).getDate());
     	System.out.println("Duration (len) from: " + reviewList.get(0).getDate() + " to " + reviewList.get(reviewList.size()-1).getDate() + " is " + len);
@@ -105,6 +109,41 @@ public class BurstPattern extends SpamDetector {
     	
     	avgReviewsInt = numOfReviews / numOfIntervals;
     	System.out.println("Average number of reviews per inteval: " + avgReviewsInt);
+    	
+    	
+    	List<Interval> intervals = new ArrayList<Interval>();
+    	
+    	// Model and store intervals of product's timeline determining start and end date
+    	for (int i = 1; i <= numOfIntervals; i++) {
+    		if (i == 1) {
+    			intervals.add(new Interval(i, reviewList.get(0).getDate(), reviewList.get(0).getDate().plusDays(dt-1)));
+    		}
+    		else if (i == numOfIntervals) {
+    			intervals.add(new Interval(i, intervals.get(i-2).getEndDate().plusDays(1), reviewList.get(reviewList.size()-1).getDate()));
+    		}
+    		else {
+    			intervals.add(new Interval(i, intervals.get(i-2).getEndDate().plusDays(1), intervals.get(i-2).getEndDate().plusDays(dt)));
+    		}
+    	}
+    	
+    	
+    	// Count amount of reviews for each interval
+    	for (Review review : reviewList) {
+    		for (int i = 0; i < intervals.size(); i++) {
+    			if (review.getDate().isEqual(intervals.get(i).getStartDate()) || review.getDate().isEqual(intervals.get(i).getEndDate()) || 
+    					(review.getDate().isAfter(intervals.get(i).getStartDate()) && review.getDate().isBefore(intervals.get(i).getEndDate()))) {
+    				intervals.get(i).addReviewId(review.getId());
+    				break;
+    			}
+    		}
+    	}
+    	
+    	
+    	// Display detected intervals
+    	for (Interval interval : intervals) {
+	    	System.out.println(interval.getIntervalId() + "\t" + interval.getStartDate() + "\t" +interval.getEndDate() + "\t" + interval.getReviewSum());
+	    }
+    	
 		
 	}
 
