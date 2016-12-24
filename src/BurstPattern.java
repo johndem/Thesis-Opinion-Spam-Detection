@@ -144,6 +144,10 @@ public class BurstPattern extends SpamDetector {
 	    	System.out.println(interval.getIntervalId() + "\t" + interval.getStartDate() + "\t" +interval.getEndDate() + "\t" + interval.getReviewSum());
 	    }
     	
+    	// Iterate each interval and check if its number of reviews exceeds that of its neighboring intervals
+    	for (int i = 0; i < intervals.size(); i++) {
+    		
+    	}
 		
 	}
 
