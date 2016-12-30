@@ -26,9 +26,14 @@ public class RatingDeviation extends SpamDetector {
 			public void apply(final Document document) {
 				double rating = Double.parseDouble(document.get("rating").toString());
 				System.out.println(rating);
+				
+				String reviewerId = document.get("userid").toString();
+				String reviewerText = document.get("content").toString();
+				String creationDate = document.get("date").toString();
+				
 				meanRating = meanRating + rating;
 				numOfReviews++;
-				reviewList.add(new Review(numOfReviews, rating, ""));
+				reviewList.add(new Review(numOfReviews, reviewerId, rating, creationDate, reviewerText));
 			}
 		});
 		

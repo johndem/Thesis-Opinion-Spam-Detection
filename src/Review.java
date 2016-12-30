@@ -11,12 +11,14 @@ public class Review {
 	DateTimeFormatter formatter;
 	private LocalDate creationDate;
 	
-	private String content;
+	private String reviewText;
 	private double rating;
 	
-	public Review(int id, double rating, String creationDate) {
+	public Review(int id, String reviewer_id, double rating, String creationDate, String reviewText) {
 		this.id = id;
 		this.rating = rating;
+		this.reviewer_id = reviewer_id;
+		this.reviewText = reviewText;
 		
 		formatter = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
 		this.creationDate = LocalDate.parse(creationDate, formatter);
@@ -32,6 +34,14 @@ public class Review {
 	
 	public LocalDate getDate() {
 		return creationDate;
+	}
+	
+	public String getReviewText() {
+		return reviewText;
+	}
+	
+	public String getReviewerId() {
+		return reviewer_id;
 	}
 
 }

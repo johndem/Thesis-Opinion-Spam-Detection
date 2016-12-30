@@ -8,6 +8,9 @@ public class Main {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
+		SpamDetector sd = new SpamDetector();
+		sd.performSpamDetection();
+		
 		/*
 		// Process and store review dataset in database
 		PreprocessDataset pData = new PreprocessDataset();
@@ -26,8 +29,11 @@ public class Main {
 		rd.analyzeRating();
 		*/
 		
+		/*
+		// Detect reviews posted in suspicious time intervals
 		BurstPattern bp = new BurstPattern();
 		bp.detectBurstPatters();
+		*/
 		
 	}
 

@@ -75,7 +75,7 @@ public class BurstPattern extends SpamDetector {
 		    	String creationDate = lineTokens[2];
 		    	
 		    	// Add review to List
-		    	reviewList.add(new Review(id, rating, creationDate));
+		    	reviewList.add(new Review(id, "", rating, creationDate, ""));
 		    	
 		    }
 		} catch (IOException e) {
@@ -142,13 +142,30 @@ public class BurstPattern extends SpamDetector {
     	// Display detected intervals
     	for (Interval interval : intervals) {
 	    	System.out.println(interval.getIntervalId() + "\t" + interval.getStartDate() + "\t" +interval.getEndDate() + "\t" + interval.getReviewSum());
-	    }
+	    	intervals.get(0).setAsSuspicious();
+    	}
+    	
+    	
+    	// Check if first interval's number of reviews exceeds that of its neighbor
+    	if (intervals.get(0).getReviewSum() > intervals.get(1).getReviewSum() && intervals.get(0).getReviewSum() > avgReviewsInt) {
+    		System.out.println("Interval " + intervals.get(0).getIntervalId() + " matches the pattern!");
+    	}
     	
     	// Iterate each interval and check if its number of reviews exceeds that of its neighboring intervals
-    	for (int i = 0; i < intervals.size(); i++) {
-    		
+    	for (int i = 1; i < intervals.size()-1; i++) {
+    		if (intervals.get(i).getReviewSum() > intervals.get(i-1).getReviewSum() && intervals.get(i).getReviewSum() > intervals.get(i+1).getReviewSum() && intervals.get(i).getReviewSum() > avgReviewsInt) {
+    			System.out.println("Interval " + intervals.get(i).getIntervalId() + " matches the pattern!");
+    			intervals.get(i).setAsSuspicious();
+    		}
     	}
-		
+    	
+    	// Check if last interval's number of reviews exceeds that of its neighbor
+    	if (intervals.get(intervals.size()-1).getReviewSum() > intervals.get(intervals.size()-2).getReviewSum() && intervals.get(intervals.size()-1).getReviewSum() > avgReviewsInt) {
+    		System.out.println("Interval " + intervals.get(intervals.size()-1).getIntervalId() + " matches the pattern!");
+    		intervals.get(intervals.size()-1).setAsSuspicious();
+    	}
+    	
+    	
 	}
 
 }
