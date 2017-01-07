@@ -1,7 +1,3 @@
-import org.bson.Document;
-
-import com.mongodb.Block;
-import com.mongodb.client.FindIterable;
 
 public class Main {
 
