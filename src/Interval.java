@@ -47,5 +47,9 @@ public class Interval {
 	public void setAsSuspicious() {
 		suspicious = true;
 	}
+	
+	public boolean isSuspicious() {
+		return suspicious;
+	}
 
 }

@@ -78,7 +78,7 @@ public class SpamDetector {
 		// Read review and reviewer data for a specific product and store in a respective structures
 		try (BufferedReader br = new BufferedReader(new FileReader("testing.txt"))) {
 		    String line;
-		    int counter = 0;
+		    
 		    while ((line = br.readLine()) != null) {
 		    	// Process the line
 		    	String[] lineTokens = line.split("\\t");
@@ -90,7 +90,7 @@ public class SpamDetector {
 		    	
 		    	
 		    	// Add review to List
-		    	Review review = new Review(counter, reviewerId, rating, creationDate, reviewText);
+		    	Review review = new Review(reviewerId, rating, creationDate, reviewText);
 		    	reviewList.add(review);
 		    	
 		    	if (!reviewers.containsKey(reviewerId)) { // If encounter reviewer for first time, add to HashMap
@@ -100,8 +100,6 @@ public class SpamDetector {
 				else { // If reviewer already exists, simply add their review
 					reviewers.get(reviewerId).addReview(review);
 				}
-		    	
-		    	counter++;
 		    }
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -116,6 +114,13 @@ public class SpamDetector {
 			      return o1.getDate().compareTo(o2.getDate());
 			  }
 		});
+		
+		int counter = 0;
+		for (Review review : reviewList) {
+			review.setId(counter);
+			counter++;
+		}
+			
 		
 //		for (HashMap.Entry<String, Reviewer> entry : reviewers.entrySet()) {
 //			System.out.println(entry.getKey());
@@ -144,9 +149,74 @@ public class SpamDetector {
 			}
 		}
 		*/
-		System.out.println("HAHA");
-		bp.detectBurstPatterns(reviewList);
-
+		
+		/*
+		// Perform burst detection
+		List<Interval> intervals = bp.detectBurstPatterns(reviewList);
+		
+//		for (Interval interval : intervals) {
+//			if (interval.isSuspicious()) {
+//				System.out.println(interval.getStartDate() + " - " + interval.getEndDate());
+//			}
+//		}
+		
+//		for (HashMap.Entry<String, Reviewer> entry : reviewers.entrySet()) {
+//			if (entry.getValue().getReviews().size() > 1) {
+//				for (int i = 0; i < entry.getValue().getReviews().size(); i++) {
+//					for (Interval interval : intervals) {
+//						if (interval.getReviews().contains(entry.getValue().getReviews().get(i))) {
+//							System.out.println(entry.getKey() + " -- " + entry.getValue().getReviews().get(i).getRating() + " - " + entry.getValue().getReviews().get(i).getTestDate());
+//						}
+//					}
+//				}
+//			}
+//		}
+		
+//		for (int i = 0; i < intervals.get(4).getReviews().size(); i++) {
+//			System.out.println(reviewList.get(intervals.get(4).getReviews().get(i)).getId() + " - " + reviewList.get(intervals.get(4).getReviews().get(i)).getTestDate());
+//		}
+		*/
+		
+		// Perform content similarity check
+		List<String> test = new ArrayList<String>();
+		test.add("The game of life is a game of everlasting learning");
+		test.add("The unexamined game of life is only for learning");
+		test.add("Never stop learning");
+		
+		List<Integer> ids = new ArrayList<Integer>();
+		ids.add(12);
+		ids.add(3);
+		ids.add(2);
+		
+		ContentSimilarity cs = new ContentSimilarity();
+		HashMap<Integer, List<Double>> reviewsCS = cs.calculateSimilarityScore(test, ids);
+		
+		// Check similarity between a reviewer's reviews
+		/*
+		double reviewerSimilarityScore = 0.0;
+		int counter = 0;
+		for (HashMap.Entry<Integer, List<Double>> entry : reviewsCS.entrySet()) {
+			for (Double score : entry.getValue()) {
+				reviewerSimilarityScore = reviewerSimilarityScore + score;
+				counter++;
+			}
+		}
+		reviewerSimilarityScore = reviewerSimilarityScore / counter;
+		//System.out.println("Overall similarity score of this reviewer's reviews is " + similarityScore);
+		 */
+		
+		// Check similarity between reviews of a burst
+		for (HashMap.Entry<Integer, List<Double>> entry : reviewsCS.entrySet()) {
+			double reviewSimilarityScore = 0.0;
+			int count = 0;
+			for (Double score : entry.getValue()) {
+				reviewSimilarityScore = reviewSimilarityScore + score;
+				count++;
+			}
+			reviewSimilarityScore = reviewSimilarityScore / count;
+			//System.out.println("Overall similarity score of review with ID " + entry.getKey() + " is " + reviewSimilarityScore);
+		}
+		
 	}
 	
 	

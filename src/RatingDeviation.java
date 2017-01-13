@@ -1,6 +1,6 @@
 import java.util.List;
 
-public class RatingDeviation extends SpamDetector {
+public class RatingDeviation {
 	
 	private double meanRating; // Mean rating of all reviews of a product
 	private int numOfReviews; // Number of reviews of a product

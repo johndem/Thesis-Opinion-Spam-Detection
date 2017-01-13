@@ -2,7 +2,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BurstPattern extends SpamDetector {
+public class BurstPattern {
 	
 	private int numOfReviews; // Number of reviews of a product
 	private int len; // Duration (in days) from first created review to newest
@@ -17,7 +17,7 @@ public class BurstPattern extends SpamDetector {
 		dt = 14;
 	}
 	
-	public void detectBurstPatterns(List<Review> reviews) {
+	public List<Interval> detectBurstPatterns(List<Review> reviews) {
 	
 		numOfReviews = reviews.size();
 
@@ -91,7 +91,7 @@ public class BurstPattern extends SpamDetector {
     		intervals.get(intervals.size()-1).setAsSuspicious();
     	}
     	
-    	
+    	return intervals;
 	}
 
 }

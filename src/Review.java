@@ -15,8 +15,7 @@ public class Review {
 	private String reviewText;
 	private double rating;
 	
-	public Review(int id, String reviewer_id, double rating, String creationDate, String reviewText) {
-		this.id = id;
+	public Review(String reviewer_id, double rating, String creationDate, String reviewText) {
 		this.rating = rating;
 		this.reviewer_id = reviewer_id;
 		this.reviewText = reviewText;
@@ -25,6 +24,10 @@ public class Review {
 		this.creationDate = LocalDate.parse(creationDate, formatter);
 		
 		testDate = creationDate;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
 	}
 	
 	public int getId() {
