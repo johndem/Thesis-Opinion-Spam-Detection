@@ -8,7 +8,7 @@ public class ContentSimilarity {
 		
 	}
 	
-	public double cosineSimilarity(List<Double> doc1, List<Double> doc2, int len) {
+	private double cosineSimilarity(List<Double> doc1, List<Double> doc2, int len) {
 		double sum1 = 0, sum2 = 0, sum3 = 0;
 		
 		for (int i = 0; i < len; i++) {
@@ -22,13 +22,14 @@ public class ContentSimilarity {
 		return sum1/(sum2*sum3);
 	}
 	
+	/*
 	public double tf(List<String> doc, String term) {
 	    double result = 0;
 	    for (String word : doc) {
 	       if (term.equals(word))
 	              result++;
 	       }
-	    return result / doc.size();
+	    return result;// / doc.size()
 	}
 	
 	public double idf(List<List<String>> docs, String term) {
@@ -47,6 +48,16 @@ public class ContentSimilarity {
 	public double tfIdf(List<String> doc, List<List<String>> docs, String term) {
 		//System.out.println("For word " + term + " TF is " + tf(doc, term) + " and IDF is " + idf(docs, term));
 	    return tf(doc, term) * idf(docs, term);
+	}
+	*/
+	
+	private double termFrequency(List<String> doc, String term) {
+	    double result = 0;
+	    for (String word : doc) {
+	       if (term.equals(word))
+	              result++;
+	       }
+	    return result;
 	}
 	
 	public HashMap<Integer, List<Double>> calculateSimilarityScore(List<String> docs, List<Integer> ids) {
@@ -95,7 +106,7 @@ public class ContentSimilarity {
 			for (int i = 0; i < docs.size(); i++) {
 				double value = 0.0;
 				if (docTermsList.get(i).contains(word)) {
-					value = tfIdf(docTermsList.get(i), docTermsList, word);
+					value = termFrequency(docTermsList.get(i), word);
 				}
 				vectors.get(i).add(value);
 			}
@@ -144,7 +155,7 @@ public class ContentSimilarity {
 			reviewsCS.put(ids.get(i), reviewCSlist);
 		}
 		
-		/*
+		
 		// Display each review id with its associated similarity scores with other reviews
 		for (HashMap.Entry<Integer, List<Double>> entry : reviewsCS.entrySet()) {
 			System.out.println("Review with ID " + entry.getKey() + " has similarity scores:");
@@ -152,7 +163,7 @@ public class ContentSimilarity {
 				System.out.println(score);
 			}
 		}
-		*/
+		
 		
 		return reviewsCS;
 	}

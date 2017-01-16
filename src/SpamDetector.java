@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import org.bson.Document;
 
@@ -24,6 +25,8 @@ public class SpamDetector {
 	
 	private RatingDeviation rd;
 	private BurstPattern bp;
+	
+	String randomKey;
 	
 	public SpamDetector() {
 		mongo = new MongoDB();
@@ -128,6 +131,22 @@ public class SpamDetector {
 //				System.out.println(entry.getValue().getReviews().get(i).getRating() + " -> " + entry.getValue().getReviews().get(i).getTestDate() + " (" + entry.getValue().getReviews().get(i).getId() + " - " + entry.getValue().getReviews().get(i).getReviewerId() + ")");
 //			}
 //		}
+
+		/*
+		// Collect each reviewer's reviewing history
+		for (HashMap.Entry<String, Reviewer> entry : reviewers.entrySet()) {
+			FindIterable<Document> iterable = mongo.retrieveUserReviews(entry.getKey());
+			
+			iterable.forEach(new Block<Document>() {
+				@Override
+				public void apply(final Document document) {
+					String creationDate = document.get("date").toString();
+					entry.getValue().addToHistory(creationDate);
+				}
+			});
+		}
+		*/
+		
 	}
 	
 	public void performSpamDetection() {
@@ -178,6 +197,7 @@ public class SpamDetector {
 		*/
 		
 		// Perform content similarity check
+		/*
 		List<String> test = new ArrayList<String>();
 		test.add("The game of life is a game of everlasting learning");
 		test.add("The unexamined game of life is only for learning");
@@ -192,7 +212,7 @@ public class SpamDetector {
 		HashMap<Integer, List<Double>> reviewsCS = cs.calculateSimilarityScore(test, ids);
 		
 		// Check similarity between a reviewer's reviews
-		/*
+		
 		double reviewerSimilarityScore = 0.0;
 		int counter = 0;
 		for (HashMap.Entry<Integer, List<Double>> entry : reviewsCS.entrySet()) {
@@ -203,7 +223,8 @@ public class SpamDetector {
 		}
 		reviewerSimilarityScore = reviewerSimilarityScore / counter;
 		//System.out.println("Overall similarity score of this reviewer's reviews is " + similarityScore);
-		 */
+		
+		
 		
 		// Check similarity between reviews of a burst
 		for (HashMap.Entry<Integer, List<Double>> entry : reviewsCS.entrySet()) {
@@ -216,7 +237,15 @@ public class SpamDetector {
 			reviewSimilarityScore = reviewSimilarityScore / count;
 			//System.out.println("Overall similarity score of review with ID " + entry.getKey() + " is " + reviewSimilarityScore);
 		}
+		*/
 		
+		/*
+		// Calculate reviewing burstiness for each reviewer
+		for (HashMap.Entry<String, Reviewer> entry : reviewers.entrySet()) {
+			entry.getValue().measureReviewingBurstiness();
+		}
+		//reviewers.get(randomKey).measureReviewingBurstiness();
+		*/
 	}
 	
 	
