@@ -15,10 +15,24 @@ public class Review {
 	private String reviewText;
 	private double rating;
 	
+	private double contentSimilarityInBurst;
+	
 	public Review(String reviewer_id, double rating, String creationDate, String reviewText) {
 		this.rating = rating;
 		this.reviewer_id = reviewer_id;
 		this.reviewText = reviewText;
+		
+		formatter = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
+		this.creationDate = LocalDate.parse(creationDate, formatter);
+		
+		contentSimilarityInBurst = 0.0;
+		
+		testDate = creationDate;
+	}
+	
+	public Review(double rating, String creationDate, String product_id) {
+		this.rating = rating;
+		this.product_id = product_id;
 		
 		formatter = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
 		this.creationDate = LocalDate.parse(creationDate, formatter);
@@ -48,6 +62,14 @@ public class Review {
 	
 	public String getReviewerId() {
 		return reviewer_id;
+	}
+	
+	public String getProductId() {
+		return product_id;
+	}
+	
+	public void setContentSimilarityInBurst(double contentSimilarityInBurst) {
+		this.contentSimilarityInBurst = contentSimilarityInBurst;
 	}
 	
 	public String getTestDate() {

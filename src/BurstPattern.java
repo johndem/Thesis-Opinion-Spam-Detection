@@ -54,15 +54,25 @@ public class BurstPattern {
     	
     	
     	// Count amount of reviews for each interval
-    	for (Review review : reviews) {
+    	for (int j = 0; j < reviews.size(); j++) {
     		for (int i = 0; i < intervals.size(); i++) {
-    			if (review.getDate().isEqual(intervals.get(i).getStartDate()) || review.getDate().isEqual(intervals.get(i).getEndDate()) || 
-    					(review.getDate().isAfter(intervals.get(i).getStartDate()) && review.getDate().isBefore(intervals.get(i).getEndDate()))) {
-    				intervals.get(i).addReviewId(review.getId());
+    			if (reviews.get(j).getDate().isEqual(intervals.get(i).getStartDate()) || reviews.get(j).getDate().isEqual(intervals.get(i).getEndDate()) || 
+    					(reviews.get(j).getDate().isAfter(intervals.get(i).getStartDate()) && reviews.get(j).getDate().isBefore(intervals.get(i).getEndDate()))) {
+    				reviews.get(j).setId(j);
+    				intervals.get(i).addReview(reviews.get(j));
     				break;
     			}
     		}
     	}
+//    	for (Review review : reviews) {
+//    		for (int i = 0; i < intervals.size(); i++) {
+//    			if (review.getDate().isEqual(intervals.get(i).getStartDate()) || review.getDate().isEqual(intervals.get(i).getEndDate()) || 
+//    					(review.getDate().isAfter(intervals.get(i).getStartDate()) && review.getDate().isBefore(intervals.get(i).getEndDate()))) {
+//    				intervals.get(i).addReview(review);
+//    				break;
+//    			}
+//    		}
+//    	}
     	
     	
     	// Display detected intervals

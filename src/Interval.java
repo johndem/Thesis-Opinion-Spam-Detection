@@ -7,7 +7,7 @@ public class Interval {
 	private int intId;
 	private LocalDate startDate;
 	private LocalDate endDate;
-	private List<Integer> reviews;
+	private List<Review> reviews;
 	private boolean suspicious;
 	
 	public Interval(int intId, LocalDate startDate, LocalDate endDate) {
@@ -15,7 +15,7 @@ public class Interval {
 		this.startDate = startDate;
 		this.endDate = endDate;
 		
-		reviews = new ArrayList<Integer>();
+		reviews = new ArrayList<Review>();
 		
 		suspicious = false;
 	}
@@ -32,11 +32,11 @@ public class Interval {
 		return endDate;
 	}
 	
-	public void addReviewId(int id) {
-		reviews.add(id);
+	public void addReview(Review review) {
+		reviews.add(review);
 	}
 	
-	public List<Integer> getReviews() {
+	public List<Review> getReviews() {
 		return reviews;
 	}
 	
