@@ -23,6 +23,7 @@ public class SpamDetector {
 	
 	private int ReviewIdIterator;
 	
+	private Classification classifier;
 	private RatingDeviation rd;
 	private BurstPattern bp;
 	
@@ -34,6 +35,7 @@ public class SpamDetector {
 		reviewers = new HashMap<String, Reviewer>();
 		ReviewIdIterator = 0;
 		
+		classifier = new Classification(1);
 		bp = new BurstPattern();
 	}
 	
@@ -134,26 +136,125 @@ public class SpamDetector {
 
 		
 		// Collect each reviewer's reviewing history
-		for (HashMap.Entry<String, Reviewer> entry : reviewers.entrySet()) {
-			FindIterable<Document> iterable = mongo.retrieveUserReviews(entry.getKey());
-			
-			iterable.forEach(new Block<Document>() {
-				@Override
-				public void apply(final Document document) {
-					String creationDate = document.get("date").toString();
-					double rating = Double.parseDouble(document.get("rating").toString());
-					String product_id = document.get("pid").toString();
-					
-					entry.getValue().addToHistory(new Review(rating, creationDate, product_id));
+		//for (HashMap.Entry<String, Reviewer> entry : reviewers.entrySet()) {
+		//FindIterable<Document> iterable = mongo.retrieveUserReviews(entry.getKey());
+		long startTime = System.nanoTime();
+		
+		FindIterable<Document> iterable = mongo.retrieveUserReviews("A1B2ZJQTVK7BWX");
+		
+		iterable.forEach(new Block<Document>() {
+			@Override
+			public void apply(final Document document) {
+				String creationDate = document.get("date").toString();
+				double rating = Double.parseDouble(document.get("rating").toString());
+				String product_id = document.get("pid").toString();
+				
+				//entry.getValue().addToHistory(new Review(rating, creationDate, product_id));
+				reviewers.get("A1B2ZJQTVK7BWX").addToHistory(new Review(rating, creationDate, product_id));
+			}
+		});
+		//}
+		long endTime = System.nanoTime();
+		long duration = (endTime - startTime) / 1000000;  //divide by 1000000 to get milliseconds.
+		System.out.println("Extracting history duration: " + duration);
+	}
+	
+	public void performSpamDetection() throws Exception {
+		readReviewInput();
+		
+		ContentSimilarity cs = new ContentSimilarity();
+		
+		// Perform burst detection
+		List<Interval> intervals = bp.detectBurstPatterns(reviewList);
+		
+		// Check similarity between reviews of a burst
+		for (Interval interval : intervals) {
+			if (interval.isSuspicious()) {
+				List<String> reviewContents = new ArrayList<String>();
+				List<Integer> ids = new ArrayList<Integer>();
+				for (int i = 0; i < interval.getReviews().size(); i++) {
+					reviewContents.add(interval.getReviews().get(i).getReviewText());
+					ids.add(interval.getReviews().get(i).getId());
 				}
-			});
+					
+				// Calculate similarity scores
+				HashMap<Integer, List<Double>> reviewsCS = cs.calculateSimilarityScore(reviewContents, ids);
+				
+				// Get the average similarity score for the review
+				for (HashMap.Entry<Integer, List<Double>> entry : reviewsCS.entrySet()) {
+					double reviewSimilarityScore = 0.0;
+					int count = 0;
+					for (Double score : entry.getValue()) {
+						reviewSimilarityScore = reviewSimilarityScore + score;
+						count++;
+					}
+					reviewSimilarityScore = reviewSimilarityScore / count;
+					//System.out.println("Overall similarity score of review with ID " + entry.getKey() + " is " + reviewSimilarityScore);
+					
+					reviewList.get(entry.getKey()).setContentSimilarityInBurst(reviewSimilarityScore);
+				}
+				
+			}
 		}
 		
 		
-	}
-	
-	public void performSpamDetection() {
-		readReviewInput();
+		// Analyze each review body and assign spam score
+		for (Review review : reviewList) {
+			List<String> reviewToBeClassified = new ArrayList<String>();
+			reviewToBeClassified.add(review.getReviewText());
+			// Classify review content with MLP
+			reviewToBeClassified = classifier.classifyReviews(reviewToBeClassified);
+			
+			if (reviewToBeClassified.get(0).equals("spam"))
+				review.setContentLabel(1.0);
+			else
+				review.setContentLabel(0.0);
+			
+			review.calculateReviewSpamScore();
+		}
+		
+		
+		rd = new RatingDeviation(5, reviewList);
+		
+		// Analyze each reviewer's activity and assign spam score
+		for (HashMap.Entry<String, Reviewer> entry : reviewers.entrySet()) {
+			
+			// Perform rating deviation analysis
+			entry.getValue().setAvgRatingDeviation(rd.analyzeRatings(entry.getValue().getReviews()));
+			
+			
+			// Check similarity between each reviewer's reviews
+			List<String> reviewContents = new ArrayList<String>();
+			List<Integer> ids = new ArrayList<Integer>();
+			// Collect reviewer's reviews for a given product
+			for (int i = 0; i < entry.getValue().getReviews().size(); i++) {
+				reviewContents.add(entry.getValue().getReviews().get(i).getReviewText());
+				ids.add(1);
+			}
+			
+			// Calculate similarity scores
+			HashMap<Integer, List<Double>> reviewsCS = cs.calculateSimilarityScore(reviewContents, ids);
+			
+			// Get the average similarity score for the reviewer's content
+			double reviewerSimilarityScore = 0.0;
+			int counter = 0;
+			for (HashMap.Entry<Integer, List<Double>> reviewEntry : reviewsCS.entrySet()) {
+				for (Double score : reviewEntry.getValue()) {
+					reviewerSimilarityScore = reviewerSimilarityScore + score;
+					counter++;
+				}
+			}
+			reviewerSimilarityScore = reviewerSimilarityScore / counter;
+			
+			entry.getValue().setReviewContentSimilarity(reviewerSimilarityScore);
+//			System.out.println("Overall similarity score of reviewer " + reviewerEntry.getKey() + "'s reviews is " + reviewerSimilarityScore);
+			
+			
+			// Examine reviewer's general activity and reviewing history
+			entry.getValue().analyzeReviewingHistory();
+		}
+		
+		
 		
 		/*
 		// Perform rating deviation analysis on each reviewer
@@ -174,7 +275,7 @@ public class SpamDetector {
 		
 		
 		// Perform burst detection
-		List<Interval> intervals = bp.detectBurstPatterns(reviewList);
+		//List<Interval> intervals = bp.detectBurstPatterns(reviewList);
 		
 		/*
 //		for (Interval interval : intervals) {
@@ -283,6 +384,9 @@ public class SpamDetector {
 		}
 		//reviewers.get(randomKey).measureReviewingBurstiness();
 		*/
+		
+		//reviewers.get("A1B2ZJQTVK7BWX").analyzeReviewingHistory();
+		
 	}
 	
 	

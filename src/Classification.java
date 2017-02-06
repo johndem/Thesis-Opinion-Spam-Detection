@@ -1,33 +1,41 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.evaluation.Evaluation;
+import weka.classifiers.functions.MultilayerPerceptron;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 
-public class Classifier {
+public class Classification {
 	
 	private int N;
-	private FeatureExtraction fExtract;
+	private FeatureExtraction features;
+	private Classifier cls;
 	private ArrayList<String> classValues;
 	
-	public Classifier(int N) {
-		
+	public Classification(int N) {
 		this.N = N;
+		features = new FeatureExtraction(N);
+		features.generateNgrams();
 		
-		fExtract = new FeatureExtraction(N);
-		fExtract.generateCharacterNgrams();
+		// Load classifier and classify test instances
+		try {
+			cls = (Classifier) weka.core.SerializationHelper.read("mlp.model");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		// Declare class values
 		classValues = new ArrayList<String>(2);
 		classValues.add("spam");
 		classValues.add("honest");
-		
 	}
 	
 	private Instances getClassifierInstances(boolean annotated, List<HashMap<Integer, String>> featureVectors) {
@@ -37,7 +45,7 @@ public class Classifier {
 		Attribute classAtt = new Attribute("theClass", classValues); // Declare class attribute
 		
 		// Declare an attribute for each dimension of the n-gram corpus
-		for (String nGram : fExtract.getCharacterNgramList()) {
+		for (String nGram : features.getNgramList()) {
 			atts.add(new Attribute(nGram));
 		}
 		
@@ -72,38 +80,62 @@ public class Classifier {
 		
 	}
 	
-	public void classifyReviews() {
+	public void MultiLayerPerceptron() throws Exception {
 		
-		List<HashMap<Integer, String>> trainingFeatureVectors = fExtract.generateFeatures(N, true); // List of the training feature vectors
-		
+		// Load training instances
+		List<HashMap<Integer, String>> trainingFeatureVectors = features.generateFeatures(true, null); // List of the training feature vectors
 		Instances isTrainingSet = getClassifierInstances(true, trainingFeatureVectors); // Training set of instances for the classifier
 		
-		// Build and train Naive Bayes classifier
-		AbstractClassifier NB = (AbstractClassifier) new NaiveBayes();
-		try {
-			NB.buildClassifier(isTrainingSet);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		MultilayerPerceptron mlp = new MultilayerPerceptron();
+		
+		mlp.setLearningRate(0.1);
+		mlp.setMomentum(0.25);
+		mlp.setTrainingTime(20);
+		mlp.setHiddenLayers("100");
+		mlp.setNormalizeAttributes(false);
+		
+		/*
+		mlp.buildClassifier(isTrainingSet);
+		
+		// Save the classifier model
+		weka.core.SerializationHelper.write("mlp.model", mlp);
+		*/
+		
+		// Evaluate the model
+		Evaluation eTest = new Evaluation(isTrainingSet);
+		eTest.crossValidateModel(mlp, isTrainingSet, 10, new Random(1));
+		 
+		// Print the result à la Weka explorer:
+		String strSummary = eTest.toSummaryString();
+		System.out.println(strSummary);
+		
+		double fMeasure = 0.0;
+		for (int i = 0; i < isTrainingSet.numClasses(); i++) {
+			fMeasure = fMeasure + eTest.fMeasure(i);
+			System.out.println(isTrainingSet.classAttribute().value(i) + " -> FMeasure: " + eTest.fMeasure(i));
 		}
+		System.out.println("Mean FMeasure: " + fMeasure/2);
 		
-		// Test the model
-//		 Evaluation eTest = new Evaluation(isTrainingSet);
-//		 eTest.evaluateModel(NB, isTestingSet);
+	}
+	
+	public List<String> classifyReviews(List<String> documents) {
+		List<String> classifiedDocs = new ArrayList<String>();
 		
-		List<HashMap<Integer, String>> reviewFeatureVectors = fExtract.generateFeatures(N, false); // List of the review feature vectors to be classified
+		List<HashMap<Integer, String>> reviewFeatureVectors = features.generateFeatures(false, documents); // List of the review feature vectors to be classified
 		
 		Instances isDataset = getClassifierInstances(false, reviewFeatureVectors); // Dataset of review text instances for the classifier
 		
 		for (Instance instance : isDataset) {
 			try {
-				double prediction = NB.classifyInstance(instance);
-				System.out.println(classValues.get((int) prediction));
+				double prediction = cls.classifyInstance(instance);
+				classifiedDocs.add(classValues.get((int) prediction));
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
+		
+		return classifiedDocs;
 		
 	}
 

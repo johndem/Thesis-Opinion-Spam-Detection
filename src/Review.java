@@ -15,7 +15,9 @@ public class Review {
 	private String reviewText;
 	private double rating;
 	
+	private double contentLabel;
 	private double contentSimilarityInBurst;
+	private double reviewSpamScore;
 	
 	public Review(String reviewer_id, double rating, String creationDate, String reviewText) {
 		this.rating = rating;
@@ -25,7 +27,9 @@ public class Review {
 		formatter = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
 		this.creationDate = LocalDate.parse(creationDate, formatter);
 		
+		contentLabel = 0.0;
 		contentSimilarityInBurst = 0.0;
+		reviewSpamScore = 0.0;
 		
 		testDate = creationDate;
 	}
@@ -68,8 +72,20 @@ public class Review {
 		return product_id;
 	}
 	
+	public void setContentLabel(double contentLabel) {
+		this.contentLabel = contentLabel;
+	}
+	
 	public void setContentSimilarityInBurst(double contentSimilarityInBurst) {
 		this.contentSimilarityInBurst = contentSimilarityInBurst;
+	}
+	
+	public void calculateReviewSpamScore() {
+		reviewSpamScore = contentLabel + contentSimilarityInBurst;
+	}
+	
+	public double getReviewSpamScore() {
+		return reviewSpamScore;
 	}
 	
 	public String getTestDate() {

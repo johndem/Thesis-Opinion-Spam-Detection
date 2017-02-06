@@ -1,4 +1,3 @@
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -10,23 +9,37 @@ import java.util.Locale;
 
 public class Reviewer {
 	
-	private float spamicity;
+	private double spamicity;
 	
 	private List<Review> reviews;
+	
+	private double reviewsScore;
+	
 	private double avgRatingDeviation;
+	private double reviewContentSimilarity;
 	
 	private int totalBurstyReviews;
-	private double reviewContentSimilarity;
+	
+	private double burstyReviewer;
+	private double averateReviewsPerProduct;
+	private double exRatingRatio;
+	
 	
 	private List<Review> reviewingHistory;
 	private DateTimeFormatter formatter;
 	
+	private int normalActivityDuration = 60;
+	
 	public Reviewer() {
-		spamicity = 0;
+		spamicity = 0.0;
 		reviews = new ArrayList<Review>();
 		
-		totalBurstyReviews = 0;
+		reviewsScore = 0.0;
 		reviewContentSimilarity = 0.0;
+		burstyReviewer = 0.0;
+		totalBurstyReviews = 0;
+		exRatingRatio = 0.0;
+		averateReviewsPerProduct = 0.0;
 		
 		reviewingHistory = new ArrayList<Review>();
 		formatter = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
@@ -42,6 +55,10 @@ public class Reviewer {
 	
 	public void setAvgRatingDeviation(double dev) {
 		avgRatingDeviation = dev;
+	}
+	
+	public void addReviewScore(double score) {
+		reviewsScore = reviewsScore + score;
 	}
 	
 	public double getAvgRatingDeviation() {
@@ -74,15 +91,11 @@ public class Reviewer {
 		
 		// Calculate duration between reviewer's first and last review
 		int daysOfActivity = (int) ChronoUnit.DAYS.between(reviewingHistory.get(0).getDate(), reviewingHistory.get(reviewingHistory.size()-1).getDate());
-		
-		/*
-		// Display reviewing history and burstiness score
-		for (LocalDate date : reviewingHistory) {
-			System.out.println(date);
+		if (daysOfActivity < normalActivityDuration) {
+			burstyReviewer = 1.0;
 		}
-		*/
-		System.out.println("Reviewer has " + daysOfActivity + " days of activity.");
 		
+		System.out.println("Reviewer has " + daysOfActivity + " days of activity.");
 	}
 	
 	public void extractAverageProliferation() {
@@ -95,15 +108,16 @@ public class Reviewer {
 				reviewsPerProduct.put(review.getProductId(), value);
 			}
 			else {
-				reviewsPerProduct.put(review.getProductId(), 0);
+				reviewsPerProduct.put(review.getProductId(), 1);
 			}
 		}
 		
 		int sum = 0;
 		for (HashMap.Entry<String, Integer> entry : reviewsPerProduct.entrySet()) {
+			System.out.println(entry.getKey() + " - " + entry.getValue());
 			sum = sum + entry.getValue();
 		}
-		float averateReviewsPerProduct = (float) sum / reviewsPerProduct.size();
+		 averateReviewsPerProduct = (double) sum / reviewsPerProduct.size();
 		
 		System.out.println("Reviewer writes on average " + averateReviewsPerProduct + " reviews per product.");
 	}
@@ -115,18 +129,32 @@ public class Reviewer {
 				extremeRatings++;
 		}
 		
-		float exRatingRatio = (float) extremeRatings / reviewingHistory.size();
+		exRatingRatio = (double) extremeRatings / reviewingHistory.size();
 		
 		System.out.println("Reviewer has an extreme rating ratio of " + exRatingRatio);
 	}
 	
 	public void analyzeReviewingHistory() {
 		
+		// Display reviewing history and burstiness score
+		for (Review review : reviewingHistory) {
+			System.out.println(review.getProductId() + "	" + review.getRating() + "	" + review.getDate());
+		}
+		
 		measureReviewingBurstiness();
 		
 		extractAverageProliferation();
 		
 		calculateRatingExtremity();
+	}
+	
+	public void measureReviewerSpamicity() {
+		reviewsScore = (double) reviewsScore / reviews.size();
+		spamicity = reviewsScore + avgRatingDeviation + reviewContentSimilarity + reviews.size() + (totalBurstyReviews / reviews.size()) + burstyReviewer + averateReviewsPerProduct + exRatingRatio;
+	}
+	
+	public double getSpamicity() {
+		return spamicity;
 	}
 
 }
