@@ -80,8 +80,8 @@ public class Review {
 		this.contentSimilarityInBurst = contentSimilarityInBurst;
 	}
 	
-	public void calculateReviewSpamScore() {
-		reviewSpamScore = contentLabel + contentSimilarityInBurst;
+	public void calculateReviewSpamScore(double reviewerScore) {
+		reviewSpamScore = 0.2 * contentLabel + contentSimilarityInBurst + reviewerScore;
 	}
 	
 	public double getReviewSpamScore() {
@@ -90,6 +90,12 @@ public class Review {
 	
 	public String getTestDate() {
 		return testDate;
+	}
+	
+	public void printReviewStats() {
+		//System.out.println("Reviews Score: " + reviewsScore);
+		System.out.println("Content Label: " + contentLabel);
+		System.out.println("CSB: " + contentSimilarityInBurst);
 	}
 
 }

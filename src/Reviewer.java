@@ -10,6 +10,7 @@ import java.util.Locale;
 public class Reviewer {
 	
 	private double spamicity;
+	private double historyScore;
 	
 	private List<Review> reviews;
 	
@@ -28,10 +29,11 @@ public class Reviewer {
 	private List<Review> reviewingHistory;
 	private DateTimeFormatter formatter;
 	
-	private int normalActivityDuration = 60;
+	private int normalActivityDuration = 30;
 	
 	public Reviewer() {
 		spamicity = 0.0;
+		historyScore = 0;
 		reviews = new ArrayList<Review>();
 		
 		reviewsScore = 0.0;
@@ -87,15 +89,15 @@ public class Reviewer {
 			  }
 		});
 		
-		System.out.println("Reviewer has written " + reviewingHistory.size() + " reviews.");
+		//System.out.println("Reviewer has written " + reviewingHistory.size() + " reviews.");
 		
 		// Calculate duration between reviewer's first and last review
 		int daysOfActivity = (int) ChronoUnit.DAYS.between(reviewingHistory.get(0).getDate(), reviewingHistory.get(reviewingHistory.size()-1).getDate());
-		if (daysOfActivity < normalActivityDuration) {
+		if (reviews.size() > 4 && daysOfActivity < normalActivityDuration) {
 			burstyReviewer = 1.0;
 		}
 		
-		System.out.println("Reviewer has " + daysOfActivity + " days of activity.");
+		//System.out.println("Reviewer has " + daysOfActivity + " days of activity.");
 	}
 	
 	public void extractAverageProliferation() {
@@ -114,12 +116,12 @@ public class Reviewer {
 		
 		int sum = 0;
 		for (HashMap.Entry<String, Integer> entry : reviewsPerProduct.entrySet()) {
-			System.out.println(entry.getKey() + " - " + entry.getValue());
+			//System.out.println(entry.getKey() + " - " + entry.getValue());
 			sum = sum + entry.getValue();
 		}
-		 averateReviewsPerProduct = (double) sum / reviewsPerProduct.size();
+		averateReviewsPerProduct = (double) sum / reviewsPerProduct.size();
 		
-		System.out.println("Reviewer writes on average " + averateReviewsPerProduct + " reviews per product.");
+		//System.out.println("Reviewer writes on average " + averateReviewsPerProduct + " reviews per product.");
 	}
 	
 	public void calculateRatingExtremity() {
@@ -131,30 +133,52 @@ public class Reviewer {
 		
 		exRatingRatio = (double) extremeRatings / reviewingHistory.size();
 		
-		System.out.println("Reviewer has an extreme rating ratio of " + exRatingRatio);
+		//System.out.println("Reviewer has an extreme rating ratio of " + exRatingRatio);
 	}
 	
 	public void analyzeReviewingHistory() {
-		
-		// Display reviewing history and burstiness score
-		for (Review review : reviewingHistory) {
-			System.out.println(review.getProductId() + "	" + review.getRating() + "	" + review.getDate());
-		}
+		//printReviewerHist();
 		
 		measureReviewingBurstiness();
 		
 		extractAverageProliferation();
 		
 		calculateRatingExtremity();
+		
+		historyScore = 0.5 * burstyReviewer + 0.5 * averateReviewsPerProduct + 0.25 * exRatingRatio;
+	}
+	
+	public void printReviewerHist() {
+		// Display reviewing history
+		for (Review review : reviewingHistory) {
+			System.out.println(review.getProductId() + "	" + review.getRating() + "	" + review.getDate());
+		}
+	}
+	
+	public double getHistoryScore() {
+		return historyScore;
 	}
 	
 	public void measureReviewerSpamicity() {
-		reviewsScore = (double) reviewsScore / reviews.size();
-		spamicity = reviewsScore + avgRatingDeviation + reviewContentSimilarity + reviews.size() + (totalBurstyReviews / reviews.size()) + burstyReviewer + averateReviewsPerProduct + exRatingRatio;
+		//reviewsScore = (double) reviewsScore / reviews.size();
+		if (reviews.size() == 1)
+			totalBurstyReviews = 0;
+		spamicity = 0.125 * avgRatingDeviation + reviewContentSimilarity + 0.5 * ((double) totalBurstyReviews / reviews.size()) + 0.5 * reviews.size() + historyScore;
 	}
 	
 	public double getSpamicity() {
 		return spamicity;
+	}
+	
+	public void printReviewingStats() {
+		//System.out.println("Reviews Score: " + reviewsScore);
+		System.out.println("Average Rating Deviation: " + avgRatingDeviation);
+		System.out.println("Review Content Similarity: " + reviewContentSimilarity);
+		System.out.println("Number of Reviews: " + reviews.size());
+		System.out.println("Ratio of Bursty Reviews: " + totalBurstyReviews + " / " + reviews.size() + " = " + ((double) totalBurstyReviews / reviews.size()));
+		System.out.println("(H) Bursty Reviewing: " + burstyReviewer);
+		System.out.println("(H) Average Number of Reviews per Product: " + averateReviewsPerProduct);
+		System.out.println("(H) Extreme Rating Ratio: " + exRatingRatio);
 	}
 
 }

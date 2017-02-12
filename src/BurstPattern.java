@@ -21,20 +21,21 @@ public class BurstPattern {
 	
 		numOfReviews = reviews.size();
 
+		/*
 		// Display product reviews
 		for (Review review : reviews) {
 	    	System.out.println(review.getId() + "\t" + review.getRating() + "\t" + review.getDate());
 	    }
-		
+		*/
 		
 		len = (int) ChronoUnit.DAYS.between(reviews.get(0).getDate(), reviews.get(reviews.size()-1).getDate());
-    	System.out.println("Duration (len) from: " + reviews.get(0).getDate() + " to " + reviews.get(reviews.size()-1).getDate() + " is " + len);
+    	//System.out.println("Duration (len) from: " + reviews.get(0).getDate() + " to " + reviews.get(reviews.size()-1).getDate() + " is " + len);
     	
     	numOfIntervals = len / dt;
-    	System.out.println("Number of intevals: " + numOfIntervals);
+    	//System.out.println("Number of intevals: " + numOfIntervals);
     	
     	avgReviewsInt = numOfReviews / numOfIntervals;
-    	System.out.println("Average number of reviews per inteval: " + avgReviewsInt);
+    	//System.out.println("Average number of reviews per inteval: " + avgReviewsInt);
     	
     	
     	List<Interval> intervals = new ArrayList<Interval>();
@@ -74,30 +75,31 @@ public class BurstPattern {
 //    		}
 //    	}
     	
-    	
+    	/*
     	// Display detected intervals
     	for (Interval interval : intervals) {
 	    	System.out.println(interval.getIntervalId() + "\t" + interval.getStartDate() + "\t" +interval.getEndDate() + "\t" + interval.getReviewSum());
-	    	intervals.get(0).setAsSuspicious();
+	    	//intervals.get(0).setAsSuspicious();
     	}
-    	
+    	*/
     	
     	// Check if first interval's number of reviews exceeds that of its neighbor
     	if (intervals.get(0).getReviewSum() > intervals.get(1).getReviewSum() && intervals.get(0).getReviewSum() > avgReviewsInt) {
-    		System.out.println("Interval " + intervals.get(0).getIntervalId() + " matches the pattern!");
+    		//System.out.println("Interval " + intervals.get(0).getIntervalId() + " matches the pattern!");
+    		intervals.get(0).setAsSuspicious();
     	}
     	
     	// Iterate each interval and check if its number of reviews exceeds that of its neighboring intervals
     	for (int i = 1; i < intervals.size()-1; i++) {
     		if (intervals.get(i).getReviewSum() > intervals.get(i-1).getReviewSum() && intervals.get(i).getReviewSum() > intervals.get(i+1).getReviewSum() && intervals.get(i).getReviewSum() > avgReviewsInt) {
-    			System.out.println("Interval " + intervals.get(i).getIntervalId() + " matches the pattern!");
+    			//System.out.println("Interval " + intervals.get(i).getIntervalId() + " matches the pattern!");
     			intervals.get(i).setAsSuspicious();
     		}
     	}
     	
     	// Check if last interval's number of reviews exceeds that of its neighbor
     	if (intervals.get(intervals.size()-1).getReviewSum() > intervals.get(intervals.size()-2).getReviewSum() && intervals.get(intervals.size()-1).getReviewSum() > avgReviewsInt) {
-    		System.out.println("Interval " + intervals.get(intervals.size()-1).getIntervalId() + " matches the pattern!");
+    		//System.out.println("Interval " + intervals.get(intervals.size()-1).getIntervalId() + " matches the pattern!");
     		intervals.get(intervals.size()-1).setAsSuspicious();
     	}
     	

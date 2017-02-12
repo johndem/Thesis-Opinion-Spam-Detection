@@ -38,14 +38,20 @@ public class PreprocessDataset {
 		    	System.out.println("Content:");
 		    	System.out.println(reviewText); */
 		    	
-		    	Document review = new Document();
-		    	review.put("pid", productId);
-		    	review.put("userid", reviewerId);
-		    	review.put("date", creationDate);
-		    	review.put("rating", rating);
-		    	review.put("content", reviewText);
+		    	if (!reviewerId.equals("") && !productId.equals("") && !creationDate.equals("") && !rating.equals("") && !reviewText.equals("")) {
+		    		Document review = new Document();
+			    	review.put("pid", productId);
+			    	review.put("userid", reviewerId);
+			    	review.put("date", creationDate);
+			    	review.put("rating", rating);
+			    	review.put("content", reviewText);
+			    	
+			    	mongo.insertReview(review);
+		    	}
+		    	else
+		    		continue;
 		    	
-		    	mongo.insertReview(review);
+		    	
 		    	
 		    }
 		} catch (IOException e) {

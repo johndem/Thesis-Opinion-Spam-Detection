@@ -155,7 +155,7 @@ public class ContentSimilarity {
 			reviewsCS.put(ids.get(i), reviewCSlist);
 		}
 		
-		
+		/*
 		// Display each review id with its associated similarity scores with other reviews
 		for (HashMap.Entry<Integer, List<Double>> entry : reviewsCS.entrySet()) {
 			System.out.println("Review with ID " + entry.getKey() + " has similarity scores:");
@@ -163,7 +163,7 @@ public class ContentSimilarity {
 				System.out.println(score);
 			}
 		}
-		
+		*/
 		
 		return reviewsCS;
 	}
