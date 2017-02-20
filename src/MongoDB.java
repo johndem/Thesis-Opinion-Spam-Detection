@@ -38,7 +38,7 @@ public class MongoDB {
 	}
 	
 	// Update review spam score in reviews collection
-	public void updateReviewScore(String id, String score) {
+	public void updateReviewScore(String id, double score) {
 		database.getCollection("reviews").updateOne(new Document("_id", new ObjectId(id)), new Document("$set", new Document("score", score)));
 	}
 	
@@ -84,7 +84,7 @@ public class MongoDB {
 	
 	// Return all products from products collection
 	public FindIterable<Document> retrieveProductsCollection() {
-		FindIterable<Document> iterable = database.getCollection("products").find();
+		FindIterable<Document> iterable = database.getCollection("products").find(new Document("#reviews", new Document("$gt", 50)));
 		
 		return iterable;
 	}
@@ -98,7 +98,7 @@ public class MongoDB {
 	
 	// Return bottom-K reviews according to assigned spam score
 	public FindIterable<Document> retrieveBottomKDocuments(int k) {
-		FindIterable<Document> iterable = database.getCollection("reviews").find().sort(new Document("score", 1)).limit(k);
+		FindIterable<Document> iterable = database.getCollection("reviews").find(new Document("score", new Document("$gt", 0.0))).sort(new Document("score", 1)).limit(k);
 		
 		return iterable;
 	}

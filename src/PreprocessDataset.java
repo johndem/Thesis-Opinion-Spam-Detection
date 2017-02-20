@@ -39,7 +39,7 @@ public class PreprocessDataset {
 			    	review.put("date", creationDate);
 			    	review.put("rating", rating);
 			    	review.put("content", reviewText);
-			    	review.put("score", "0.0");
+			    	review.put("score", 0.0);
 			    	
 			    	mongo.insertReview(review);
 		    	}

@@ -36,7 +36,7 @@ public class Main {
 		/*
 		// Process and store review dataset in database
 		PreprocessDataset pData = new PreprocessDataset();
-		pData.processProducts();
+		pData.processReviews();
 		*/
 		
 	}

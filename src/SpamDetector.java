@@ -177,10 +177,17 @@ public class SpamDetector {
 						reviewSimilarityScore = reviewSimilarityScore + score;
 						count++;
 					}
-					reviewSimilarityScore = reviewSimilarityScore / count;
+					if (count > 0) {
+						reviewSimilarityScore = reviewSimilarityScore / count;
+						if (reviewSimilarityScore > 0.5)
+							reviewSimilarityScore = Math.abs(reviewSimilarityScore - 0.5);
+						else
+							reviewSimilarityScore = 0.0;
+					}
 					//System.out.println("Overall similarity score of review with ID " + entry.getKey() + " is " + reviewSimilarityScore);
 					
-					reviewList.get(entry.getKey()).setContentSimilarityInBurst(Math.abs(reviewSimilarityScore - 0.5));
+					
+					reviewList.get(entry.getKey()).setContentSimilarityInBurst(reviewSimilarityScore);
 				}
 				
 			}
@@ -260,9 +267,9 @@ public class SpamDetector {
 		
 		
 		for (Review review : reviewList)
-			mongo.updateReviewScore(review.getMongoId(), String.valueOf(review.calculateReviewSpamScore(reviewers.get(review.getReviewerId()).getSpamicity())));
+			mongo.updateReviewScore(review.getMongoId(), review.calculateReviewSpamScore(reviewers.get(review.getReviewerId()).getSpamicity()));
 		
-		
+		/*
 //		System.out.println("Number of reviews: " + reviewList.size());
 //		System.out.println("Number of reviewers: " + reviewers.size());
 		
@@ -283,7 +290,7 @@ public class SpamDetector {
 			//}
 			
 		}
-		
+		*/
 		/*
 		// Display reviewer spam scores
 		int counter = 1;
