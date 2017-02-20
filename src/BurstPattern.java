@@ -14,7 +14,7 @@ public class BurstPattern {
 	
 	public BurstPattern() {
 		len = 0;
-		dt = 14;
+		dt = 7;
 	}
 	
 	public List<Interval> detectBurstPatterns(List<Review> reviews) {

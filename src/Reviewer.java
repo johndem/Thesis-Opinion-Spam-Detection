@@ -119,6 +119,7 @@ public class Reviewer {
 			//System.out.println(entry.getKey() + " - " + entry.getValue());
 			sum = sum + entry.getValue();
 		}
+		
 		averateReviewsPerProduct = (double) sum / reviewsPerProduct.size();
 		
 		//System.out.println("Reviewer writes on average " + averateReviewsPerProduct + " reviews per product.");
@@ -136,7 +137,7 @@ public class Reviewer {
 		//System.out.println("Reviewer has an extreme rating ratio of " + exRatingRatio);
 	}
 	
-	public void analyzeReviewingHistory() {
+	public double analyzeReviewingHistory() {
 		//printReviewerHist();
 		
 		measureReviewingBurstiness();
@@ -145,7 +146,12 @@ public class Reviewer {
 		
 		calculateRatingExtremity();
 		
-		historyScore = 0.5 * burstyReviewer + 0.5 * averateReviewsPerProduct + 0.25 * exRatingRatio;
+		historyScore = 2 * burstyReviewer + 0.5 * averateReviewsPerProduct + 0.25 * exRatingRatio;
+		return historyScore;
+	}
+	
+	public void setHistoryScore(double score) {
+		historyScore = score;
 	}
 	
 	public void printReviewerHist() {
@@ -161,9 +167,10 @@ public class Reviewer {
 	
 	public void measureReviewerSpamicity() {
 		//reviewsScore = (double) reviewsScore / reviews.size();
-		if (reviews.size() == 1)
+		if (reviews.size() < 3)
 			totalBurstyReviews = 0;
-		spamicity = 0.125 * avgRatingDeviation + reviewContentSimilarity + 0.5 * ((double) totalBurstyReviews / reviews.size()) + 0.5 * reviews.size() + historyScore;
+		
+		spamicity = 0.125 * avgRatingDeviation + 1.5 * reviewContentSimilarity + 0.5 * ((double) totalBurstyReviews / reviews.size()) + 0.5 * reviews.size() + historyScore;
 	}
 	
 	public double getSpamicity() {
@@ -179,6 +186,7 @@ public class Reviewer {
 		System.out.println("(H) Bursty Reviewing: " + burstyReviewer);
 		System.out.println("(H) Average Number of Reviews per Product: " + averateReviewsPerProduct);
 		System.out.println("(H) Extreme Rating Ratio: " + exRatingRatio);
+		System.out.println("H: " + historyScore + " (" + reviewingHistory.size() + ")");
 	}
 
 }

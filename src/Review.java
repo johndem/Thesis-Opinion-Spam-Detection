@@ -4,6 +4,8 @@ import java.util.Locale;
 
 public class Review {
 	
+	private String mongo_id;
+	
 	private int id;
 	private String product_id;
 	private String reviewer_id;
@@ -19,7 +21,9 @@ public class Review {
 	private double contentSimilarityInBurst;
 	private double reviewSpamScore;
 	
-	public Review(String reviewer_id, double rating, String creationDate, String reviewText) {
+	public Review(String mongo_id, String reviewer_id, double rating, String creationDate, String reviewText) {
+		this.mongo_id = mongo_id;
+		
 		this.rating = rating;
 		this.reviewer_id = reviewer_id;
 		this.reviewText = reviewText;
@@ -42,6 +46,10 @@ public class Review {
 		this.creationDate = LocalDate.parse(creationDate, formatter);
 		
 		testDate = creationDate;
+	}
+	
+	public String getMongoId() {
+		return mongo_id;
 	}
 	
 	public void setId(int id) {
@@ -80,8 +88,9 @@ public class Review {
 		this.contentSimilarityInBurst = contentSimilarityInBurst;
 	}
 	
-	public void calculateReviewSpamScore(double reviewerScore) {
-		reviewSpamScore = 0.2 * contentLabel + contentSimilarityInBurst + reviewerScore;
+	public double calculateReviewSpamScore(double reviewerScore) {
+		reviewSpamScore = 0.2 * contentLabel + 2 * contentSimilarityInBurst + reviewerScore;
+		return reviewSpamScore;
 	}
 	
 	public double getReviewSpamScore() {
