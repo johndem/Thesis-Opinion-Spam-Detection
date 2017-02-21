@@ -86,7 +86,7 @@ public class FeatureExtraction {
 
 	}
 	
-	private HashMap<Integer, String> featureVector(String text, String textClass) {
+	private List<String> featureVector(String text, String textClass) {
 		
 		HashMap<Integer, String> vector = new HashMap<>();
 		
@@ -123,15 +123,18 @@ public class FeatureExtraction {
 			
 		}
 		
-//		System.out.println(vector);
+		List<String> vec = new ArrayList<String>();
+		for (HashMap.Entry<Integer, String> entry : vector.entrySet()) {
+			vec.add(entry.getValue());
+		}
 		
-		return vector;
+		return vec;
 		
 	}
 	
-	public List<HashMap<Integer, String>> generateFeatures(boolean annotated, List<String> docs) {
+	public List<List<String>> generateFeatures(boolean annotated, List<String> docs) {
 		
-		List<HashMap<Integer, String>> featureVectorList = new ArrayList<HashMap<Integer, String>>();
+		List<List<String>> featureVectorList = new ArrayList<List<String>>();
 		
 		if (annotated) {
 			try(Stream<Path> paths = Files.walk(Paths.get(pathToTrainingSet))) {

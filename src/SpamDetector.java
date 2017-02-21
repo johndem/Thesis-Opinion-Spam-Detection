@@ -153,43 +153,45 @@ public class SpamDetector {
 		// Perform burst detection
 		List<Interval> intervals = bp.detectBurstPatterns(reviewList);
 		
-		// Check similarity between reviews of a burst
-		for (Interval interval : intervals) {
-			if (interval.isSuspicious()) {
-				List<String> reviewContents = new ArrayList<String>();
-				List<Integer> ids = new ArrayList<Integer>();
-				for (int i = 0; i < interval.getReviews().size(); i++) {
-					reviewContents.add(interval.getReviews().get(i).getReviewText());
-					ids.add(interval.getReviews().get(i).getId());
-					
-					// Increment reviewers' bursty review ratio
-					reviewers.get(interval.getReviews().get(i).getReviewerId()).incrementBurstyReviews();
-				}
-					
-				// Calculate similarity scores
-				HashMap<Integer, List<Double>> reviewsCS = cs.calculateSimilarityScore(reviewContents, ids);
-				
-				// Get the average similarity score for the review
-				for (HashMap.Entry<Integer, List<Double>> entry : reviewsCS.entrySet()) {
-					double reviewSimilarityScore = 0.0;
-					int count = 0;
-					for (Double score : entry.getValue()) {
-						reviewSimilarityScore = reviewSimilarityScore + score;
-						count++;
+		if (intervals.size() > 0) {
+			// Check similarity between reviews of a burst
+			for (Interval interval : intervals) {
+				if (interval.isSuspicious()) {
+					List<String> reviewContents = new ArrayList<String>();
+					List<Integer> ids = new ArrayList<Integer>();
+					for (int i = 0; i < interval.getReviews().size(); i++) {
+						reviewContents.add(interval.getReviews().get(i).getReviewText());
+						ids.add(interval.getReviews().get(i).getId());
+						
+						// Increment reviewers' bursty review ratio
+						reviewers.get(interval.getReviews().get(i).getReviewerId()).incrementBurstyReviews();
 					}
-					if (count > 0) {
-						reviewSimilarityScore = reviewSimilarityScore / count;
-						if (reviewSimilarityScore > 0.5)
-							reviewSimilarityScore = Math.abs(reviewSimilarityScore - 0.5);
-						else
-							reviewSimilarityScore = 0.0;
+						
+					// Calculate similarity scores
+					HashMap<Integer, List<Double>> reviewsCS = cs.calculateSimilarityScore(reviewContents, ids);
+					
+					// Get the average similarity score for the review
+					for (HashMap.Entry<Integer, List<Double>> entry : reviewsCS.entrySet()) {
+						double reviewSimilarityScore = 0.0;
+						int count = 0;
+						for (Double score : entry.getValue()) {
+							reviewSimilarityScore = reviewSimilarityScore + score;
+							count++;
+						}
+						if (count > 0) {
+							reviewSimilarityScore = reviewSimilarityScore / count;
+							if (reviewSimilarityScore > 0.5)
+								reviewSimilarityScore = Math.abs(reviewSimilarityScore - 0.5);
+							else
+								reviewSimilarityScore = 0.0;
+						}
+						//System.out.println("Overall similarity score of review with ID " + entry.getKey() + " is " + reviewSimilarityScore);
+						
+						
+						reviewList.get(entry.getKey()).setContentSimilarityInBurst(reviewSimilarityScore);
 					}
-					//System.out.println("Overall similarity score of review with ID " + entry.getKey() + " is " + reviewSimilarityScore);
 					
-					
-					reviewList.get(entry.getKey()).setContentSimilarityInBurst(reviewSimilarityScore);
 				}
-				
 			}
 		}
 		

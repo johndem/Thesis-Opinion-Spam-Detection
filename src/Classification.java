@@ -38,7 +38,7 @@ public class Classification {
 		classValues.add("honest");
 	}
 	
-	private Instances getClassifierInstances(boolean annotated, List<HashMap<Integer, String>> featureVectors) {
+	private Instances getClassifierInstances(boolean annotated, List<List<String>> featureVectors) {
 		
 		ArrayList<Attribute>  atts = new ArrayList<Attribute>(); // Declare the feature vector
 		
@@ -58,18 +58,16 @@ public class Classification {
 		instances.setClassIndex(instances.numAttributes() - 1);
 		
 		// Create an instance for each feature vector
-		for (HashMap<Integer, String> fVector : featureVectors) {
+		for (List<String> fVector : featureVectors) {
 			
 			double[] vals = new double[instances.numAttributes()];
 
 			if (annotated) { // for annotated data add its class label
-				vals[instances.numAttributes() - 1] = classValues.indexOf(fVector.get(-1));
+				vals[instances.numAttributes() - 1] = classValues.indexOf(fVector.get(0));
 			}
 			
 			for (int i = 0; i < instances.numAttributes() - 1; i++) {
-				if (fVector.containsKey(i)) {
-					vals[i] = Double.parseDouble(fVector.get(i)); // Fill with feature vector values
-				}
+				vals[i] = Double.parseDouble(fVector.get(i+1)); // Fill with feature vector values
 			}
 			
 			instances.add(new DenseInstance(1.0, vals)); // Add the instance
@@ -83,7 +81,7 @@ public class Classification {
 	public void MultiLayerPerceptron() throws Exception {
 		
 		// Load training instances
-		List<HashMap<Integer, String>> trainingFeatureVectors = features.generateFeatures(true, null); // List of the training feature vectors
+		List<List<String>> trainingFeatureVectors = features.generateFeatures(true, null); // List of the training feature vectors
 		Instances isTrainingSet = getClassifierInstances(true, trainingFeatureVectors); // Training set of instances for the classifier
 		
 		MultilayerPerceptron mlp = new MultilayerPerceptron();
@@ -121,7 +119,7 @@ public class Classification {
 	public List<String> classifyReviews(List<String> documents) {
 		List<String> classifiedDocs = new ArrayList<String>();
 		
-		List<HashMap<Integer, String>> reviewFeatureVectors = features.generateFeatures(false, documents); // List of the review feature vectors to be classified
+		List<List<String>> reviewFeatureVectors = features.generateFeatures(false, documents); // List of the review feature vectors to be classified
 		
 		Instances isDataset = getClassifierInstances(false, reviewFeatureVectors); // Dataset of review text instances for the classifier
 		

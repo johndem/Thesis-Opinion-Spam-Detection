@@ -18,6 +18,8 @@ public class BurstPattern {
 	}
 	
 	public List<Interval> detectBurstPatterns(List<Review> reviews) {
+		
+		List<Interval> intervals = new ArrayList<Interval>();
 	
 		numOfReviews = reviews.size();
 
@@ -34,11 +36,14 @@ public class BurstPattern {
     	numOfIntervals = len / dt;
     	//System.out.println("Number of intevals: " + numOfIntervals);
     	
+    	if (numOfIntervals == 0)
+    		return intervals;
+    	
     	avgReviewsInt = numOfReviews / numOfIntervals;
     	//System.out.println("Average number of reviews per inteval: " + avgReviewsInt);
     	
     	
-    	List<Interval> intervals = new ArrayList<Interval>();
+    	
     	
     	// Model and store intervals of product's timeline determining start and end date
     	for (int i = 1; i <= numOfIntervals; i++) {
@@ -65,15 +70,6 @@ public class BurstPattern {
     			}
     		}
     	}
-//    	for (Review review : reviews) {
-//    		for (int i = 0; i < intervals.size(); i++) {
-//    			if (review.getDate().isEqual(intervals.get(i).getStartDate()) || review.getDate().isEqual(intervals.get(i).getEndDate()) || 
-//    					(review.getDate().isAfter(intervals.get(i).getStartDate()) && review.getDate().isBefore(intervals.get(i).getEndDate()))) {
-//    				intervals.get(i).addReview(review);
-//    				break;
-//    			}
-//    		}
-//    	}
     	
     	/*
     	// Display detected intervals

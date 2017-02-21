@@ -16,32 +16,33 @@ public class ReviewFilter {
 	}
 	
 	public void filterProductReviews() throws IOException {
-		FindIterable<Document> iterable = mongo.retrieveProductsCollection().noCursorTimeout(true);
-		iterable.forEach(new Block<Document>() {
-			@Override
-			public void apply(final Document document) {
-				String product_id = document.get("pid").toString();
-				String numOfReviews = document.get("#reviews").toString();
-				//System.out.println("Annotating reviews for product: " + product_id);
-				
-				try {
-					new SpamDetector(mongo, product_id).performSpamDetection();
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			}
-		});
+//		FindIterable<Document> iterable = mongo.retrieveProductsCollection().noCursorTimeout(true);
+//		iterable.forEach(new Block<Document>() {
+//			@Override
+//			public void apply(final Document document) {
+//				String product_id = document.get("pid").toString();
+//				String numOfReviews = document.get("#reviews").toString();
+//				//System.out.println("Annotating reviews for product: " + product_id);
+//				
+//				try {
+//					new SpamDetector(mongo, product_id).performSpamDetection();
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//				
+//			}
+//		});
 		
 		
-		/*
+		
 		// Extract top-K and bottom-K reviews for review text classification evaluation purposes
 		Results res = new Results();
+		int K = 10000;
 		
 		// Collect top K reviews with highest spam score to be used as spam class
 		List<String> topKreviews = new ArrayList<String>();
-		FindIterable<Document> iter = mongo.retrieveTopKDocuments(5000);
+		FindIterable<Document> iter = mongo.retrieveTopKDocuments(K);
 		iter.forEach(new Block<Document>() {
 			@Override
 			public void apply(final Document document) {
@@ -55,7 +56,7 @@ public class ReviewFilter {
 		
 		// Collect bottom K reviews with lowest spam score to be used as honest class
 		List<String> bottomKreviews = new ArrayList<String>();
-		FindIterable<Document> it = mongo.retrieveBottomKDocuments(5000);
+		FindIterable<Document> it = mongo.retrieveBottomKDocuments(K);
 		it.forEach(new Block<Document>() {
 			@Override
 			public void apply(final Document document) {
@@ -92,9 +93,11 @@ public class ReviewFilter {
 			}
 		}
 		
+		
+		System.out.println("Top K list has " + topKreviews.size() + " reviews, while bottom K list has " + bottomKreviews.size() + " reviews.");
 		res.saveReviewInstances(topKreviews, true);
 		res.saveReviewInstances(bottomKreviews, false);
-		*/
+		
 	}
 	
 }
