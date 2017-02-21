@@ -24,6 +24,7 @@ public class Reviewer {
 	private double burstyReviewer;
 	private double averateReviewsPerProduct;
 	private double exRatingRatio;
+	private double histReviewContentSimilarity;
 	
 	
 	private List<Review> reviewingHistory;
@@ -41,6 +42,7 @@ public class Reviewer {
 		burstyReviewer = 0.0;
 		totalBurstyReviews = 0;
 		exRatingRatio = 0.0;
+		histReviewContentSimilarity = 0.0;
 		averateReviewsPerProduct = 0.0;
 		
 		reviewingHistory = new ArrayList<Review>();
@@ -79,7 +81,7 @@ public class Reviewer {
 		reviewingHistory.add(review);
 	}
 	
-	public void measureReviewingBurstiness() {
+	private void measureReviewingBurstiness() {
 		// Sort review dates in reviewer's history from oldest to latest
 		Collections.sort(reviewingHistory, new Comparator<Review>() {
 			  public int compare(Review o1, Review o2) {
@@ -93,14 +95,14 @@ public class Reviewer {
 		
 		// Calculate duration between reviewer's first and last review
 		int daysOfActivity = (int) ChronoUnit.DAYS.between(reviewingHistory.get(0).getDate(), reviewingHistory.get(reviewingHistory.size()-1).getDate());
-		if (reviews.size() > 4 && daysOfActivity < normalActivityDuration) {
+		if (reviews.size() > 5 && daysOfActivity < normalActivityDuration) {
 			burstyReviewer = 1.0;
 		}
 		
 		//System.out.println("Reviewer has " + daysOfActivity + " days of activity.");
 	}
 	
-	public void extractAverageProliferation() {
+	private void extractAverageProliferation() {
 		HashMap<String, Integer> reviewsPerProduct = new HashMap<String, Integer>();
 		
 		for (Review review : reviewingHistory) {
@@ -120,12 +122,15 @@ public class Reviewer {
 			sum = sum + entry.getValue();
 		}
 		
-		averateReviewsPerProduct = (double) sum / reviewsPerProduct.size();
+		if (reviews.size() != reviewingHistory.size())
+			averateReviewsPerProduct = (double) sum / reviewsPerProduct.size();
+		else
+			averateReviewsPerProduct = 1.0;
 		
 		//System.out.println("Reviewer writes on average " + averateReviewsPerProduct + " reviews per product.");
 	}
 	
-	public void calculateRatingExtremity() {
+	private void calculateRatingExtremity() {
 		int extremeRatings = 0;
 		for (Review review : reviewingHistory) {
 			if (review.getRating() == 1.0 || review.getRating() == 5.0)
@@ -137,6 +142,31 @@ public class Reviewer {
 		//System.out.println("Reviewer has an extreme rating ratio of " + exRatingRatio);
 	}
 	
+	private void measureHistoryContentSimilarity() {
+		if (reviewingHistory.size() > 1) {
+			List<String> reviewContents = new ArrayList<String>();
+			List<Integer> ids = new ArrayList<Integer>();
+			// Collect reviewer's reviews for a given product
+			for (int i = 0; i < reviewingHistory.size(); i++) {
+				reviewContents.add(reviewingHistory.get(i).getReviewText());
+				ids.add(1);
+			}
+			
+			// Calculate similarity scores
+			HashMap<Integer, List<Double>> reviewsCS = ContentSimilarity.calculateSimilarityScore(reviewContents, ids);
+			
+			// Get the average similarity score for the reviewer's content
+			int counter = 0;
+			for (HashMap.Entry<Integer, List<Double>> reviewEntry : reviewsCS.entrySet()) {
+				for (Double score : reviewEntry.getValue()) {
+					histReviewContentSimilarity = histReviewContentSimilarity + score;
+					counter++;
+				}
+			}
+			histReviewContentSimilarity = histReviewContentSimilarity / counter;
+		}
+	}
+	
 	public double analyzeReviewingHistory() {
 		//printReviewerHist();
 		
@@ -146,7 +176,7 @@ public class Reviewer {
 		
 		calculateRatingExtremity();
 		
-		historyScore = 2 * burstyReviewer + 0.5 * averateReviewsPerProduct + 0.25 * exRatingRatio;
+		historyScore = burstyReviewer + 0.5 * averateReviewsPerProduct + 0.25 * exRatingRatio;
 		return historyScore;
 	}
 	
@@ -166,7 +196,6 @@ public class Reviewer {
 	}
 	
 	public void measureReviewerSpamicity() {
-		//reviewsScore = (double) reviewsScore / reviews.size();
 		if (reviews.size() < 3)
 			totalBurstyReviews = 0;
 		
@@ -178,7 +207,6 @@ public class Reviewer {
 	}
 	
 	public void printReviewingStats() {
-		//System.out.println("Reviews Score: " + reviewsScore);
 		System.out.println("Average Rating Deviation: " + avgRatingDeviation);
 		System.out.println("Review Content Similarity: " + reviewContentSimilarity);
 		System.out.println("Number of Reviews: " + reviews.size());

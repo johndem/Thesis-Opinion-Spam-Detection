@@ -127,7 +127,7 @@ public class PreprocessDataset {
 		    for (HashMap.Entry<String, Integer> product : productSet.entrySet()) {
 	    		Document doc = new Document();
 		    	doc.put("pid", product.getKey());
-		    	doc.put("#reviews", product.getValue());
+		    	doc.put("reviews", product.getValue());
 		    	
 		    	mongo.insertProduct(doc);
 		    }

@@ -62,12 +62,14 @@ public class Classification {
 			
 			double[] vals = new double[instances.numAttributes()];
 
+			int pos = 0;
 			if (annotated) { // for annotated data add its class label
 				vals[instances.numAttributes() - 1] = classValues.indexOf(fVector.get(0));
+				pos = 1;
 			}
 			
 			for (int i = 0; i < instances.numAttributes() - 1; i++) {
-				vals[i] = Double.parseDouble(fVector.get(i+1)); // Fill with feature vector values
+				vals[i] = Double.parseDouble(fVector.get(i+pos)); // Fill with feature vector values
 			}
 			
 			instances.add(new DenseInstance(1.0, vals)); // Add the instance

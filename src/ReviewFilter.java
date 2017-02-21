@@ -21,7 +21,6 @@ public class ReviewFilter {
 //			@Override
 //			public void apply(final Document document) {
 //				String product_id = document.get("pid").toString();
-//				String numOfReviews = document.get("#reviews").toString();
 //				//System.out.println("Annotating reviews for product: " + product_id);
 //				
 //				try {

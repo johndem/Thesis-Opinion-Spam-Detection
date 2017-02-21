@@ -96,7 +96,7 @@ public class SpamDetector {
 		    	
 		    	
 		    	// Add review to List
-		    	Review review = new Review(reviewerId, rating, creationDate, reviewText);
+		    	Review review = new Review("", reviewerId, rating, creationDate, reviewText);
 		    	reviewList.add(review);
 		    	
 		    	if (!reviewers.containsKey(reviewerId)) { // If encounter reviewer for first time, add to HashMap
@@ -148,12 +148,10 @@ public class SpamDetector {
 	public void performSpamDetection() throws Exception {
 		readReviewInput();
 		
-		ContentSimilarity cs = new ContentSimilarity();
-		
 		// Perform burst detection
 		List<Interval> intervals = bp.detectBurstPatterns(reviewList);
 		
-		if (intervals.size() > 0) {
+		if (intervals.size() > 2) {
 			// Check similarity between reviews of a burst
 			for (Interval interval : intervals) {
 				if (interval.isSuspicious()) {
@@ -168,7 +166,7 @@ public class SpamDetector {
 					}
 						
 					// Calculate similarity scores
-					HashMap<Integer, List<Double>> reviewsCS = cs.calculateSimilarityScore(reviewContents, ids);
+					HashMap<Integer, List<Double>> reviewsCS = ContentSimilarity.calculateSimilarityScore(reviewContents, ids);
 					
 					// Get the average similarity score for the review
 					for (HashMap.Entry<Integer, List<Double>> entry : reviewsCS.entrySet()) {
@@ -196,7 +194,8 @@ public class SpamDetector {
 		}
 		
 		
-		// Analyze each review body and assign spam score
+		/*
+		// Analyze each review body and assign spam score (Ignored due to evaluation requirements)
 		for (Review review : reviewList) {
 			List<String> reviewToBeClassified = new ArrayList<String>();
 			reviewToBeClassified.add(review.getReviewText());
@@ -210,6 +209,7 @@ public class SpamDetector {
 			
 			//review.calculateReviewSpamScore();
 		}
+		*/
 		
 		
 		rd = new RatingDeviation(5, reviewList);
@@ -232,7 +232,7 @@ public class SpamDetector {
 				}
 				
 				// Calculate similarity scores
-				HashMap<Integer, List<Double>> reviewsCS = cs.calculateSimilarityScore(reviewContents, ids);
+				HashMap<Integer, List<Double>> reviewsCS = ContentSimilarity.calculateSimilarityScore(reviewContents, ids);
 				
 				// Get the average similarity score for the reviewer's content
 				int counter = 0;
@@ -271,17 +271,16 @@ public class SpamDetector {
 		for (Review review : reviewList)
 			mongo.updateReviewScore(review.getMongoId(), review.calculateReviewSpamScore(reviewers.get(review.getReviewerId()).getSpamicity()));
 		
+		
 		/*
-//		System.out.println("Number of reviews: " + reviewList.size());
-//		System.out.println("Number of reviewers: " + reviewers.size());
+		System.out.println("Number of reviews: " + reviewList.size());
+		System.out.println("Number of reviewers: " + reviewers.size());
 		
 		// Display review spam scores
 		int counter = 1;
 		for (Review review : reviewList) {
-			//System.out.println(counter + ". " + review.getReviewSpamScore());
-			//counter++;
-			
-			//if (review.getReviewSpamScore() > 3) {
+			review.calculateReviewSpamScore(reviewers.get(review.getReviewerId()).getSpamicity());
+			if (review.getReviewSpamScore() > 3) {
 				System.out.println(counter + ". Score: " + review.getReviewSpamScore() + " (" + review.getTestDate() + ")");
 				System.out.println("Review stats:");
 				review.printReviewStats();
@@ -289,10 +288,11 @@ public class SpamDetector {
 				reviewers.get(review.getReviewerId()).printReviewingStats();
 				System.out.println("------------------------------------------------------");
 				counter++;
-			//}
+			}
 			
 		}
 		*/
+		
 		/*
 		// Display reviewer spam scores
 		int counter = 1;

@@ -84,7 +84,7 @@ public class MongoDB {
 	
 	// Return all products from products collection
 	public FindIterable<Document> retrieveProductsCollection() {
-		FindIterable<Document> iterable = database.getCollection("products").find(new Document("#reviews", new Document("$gt", 50)));
+		FindIterable<Document> iterable = database.getCollection("products").find(new Document("reviews", new Document("$gt", 50)));
 		
 		return iterable;
 	}

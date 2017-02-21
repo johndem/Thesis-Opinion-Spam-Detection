@@ -36,7 +36,7 @@ public class BurstPattern {
     	numOfIntervals = len / dt;
     	//System.out.println("Number of intevals: " + numOfIntervals);
     	
-    	if (numOfIntervals == 0)
+    	if (numOfIntervals < 3)
     		return intervals;
     	
     	avgReviewsInt = numOfReviews / numOfIntervals;

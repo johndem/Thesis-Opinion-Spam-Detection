@@ -8,7 +8,7 @@ public class ContentSimilarity {
 		
 	}
 	
-	private double cosineSimilarity(List<Double> doc1, List<Double> doc2, int len) {
+	private static double cosineSimilarity(List<Double> doc1, List<Double> doc2, int len) {
 		double sum1 = 0, sum2 = 0, sum3 = 0;
 		
 		for (int i = 0; i < len; i++) {
@@ -51,7 +51,7 @@ public class ContentSimilarity {
 	}
 	*/
 	
-	private double termFrequency(List<String> doc, String term) {
+	private static double termFrequency(List<String> doc, String term) {
 	    double result = 0;
 	    for (String word : doc) {
 	       if (term.equals(word))
@@ -60,7 +60,7 @@ public class ContentSimilarity {
 	    return result;
 	}
 	
-	public HashMap<Integer, List<Double>> calculateSimilarityScore(List<String> docs, List<Integer> ids) {
+	public static HashMap<Integer, List<Double>> calculateSimilarityScore(List<String> docs, List<Integer> ids) {
 		List<String> bagOfWords = new ArrayList<String>();
 		List<List<String>> docTermsList = new ArrayList<List<String>>();
 		

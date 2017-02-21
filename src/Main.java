@@ -13,7 +13,6 @@ public class Main {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		
 		ReviewFilter rFilter = new ReviewFilter();
 		try {
 			rFilter.filterProductReviews();
@@ -22,9 +21,10 @@ public class Main {
 			e.printStackTrace();
 		}
 		
-		
 		/*
-		SpamDetector sd = new SpamDetector();
+		// For testing purposes
+		MongoDB mongo= new MongoDB();
+		SpamDetector sd = new SpamDetector(mongo, "");
 		try {
 			sd.performSpamDetection();
 		} catch (Exception e) {

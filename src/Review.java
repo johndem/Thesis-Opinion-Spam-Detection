@@ -89,7 +89,7 @@ public class Review {
 	}
 	
 	public double calculateReviewSpamScore(double reviewerScore) {
-		reviewSpamScore = 0.2 * contentLabel + 2 * contentSimilarityInBurst + reviewerScore;
+		reviewSpamScore = 0.25 * contentLabel + 2 * contentSimilarityInBurst + reviewerScore;
 		return reviewSpamScore;
 	}
 	
