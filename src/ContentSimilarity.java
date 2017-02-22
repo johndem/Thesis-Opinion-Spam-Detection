@@ -167,5 +167,77 @@ public class ContentSimilarity {
 		
 		return reviewsCS;
 	}
+	
+	public static boolean similar(String doc1, String doc2) {
+		List<String> bagOfWords = new ArrayList<String>();
+		List<String> doc1terms = new ArrayList<String>();
+		List<String> doc2terms = new ArrayList<String>();
+		
+		// Create bag of words from all documents
+		String[] tokenizedTerms1 = doc1.toLowerCase().replaceAll("[^a-zA-Z ]", " ").trim().split("\\W+");
+	    for (String term : tokenizedTerms1) {
+	    	if (!bagOfWords.contains(term)) {
+	    		bagOfWords.add(term);
+	    	}
+	    	doc1terms.add(term); // Add each doc's terms to a respective list
+	    }
+	    String[] tokenizedTerms2 = doc2.toLowerCase().replaceAll("[^a-zA-Z ]", " ").trim().split("\\W+");
+	    for (String term : tokenizedTerms2) {
+	    	if (!bagOfWords.contains(term)) {
+	    		bagOfWords.add(term);
+	    	}
+	    	doc2terms.add(term); // Add each doc's terms to a respective list
+	    }
+		
+		/*
+		// Display bag of words
+		System.out.println("Bag of words has the following words:");
+		for (String word : bagOfWords) {
+			System.out.println(bagOfWords.indexOf(word) + ". " + word);
+		}
+		
+		// Display each document's terms
+		for (List<String> list : docTermsList) {
+			System.out.println(docTermsList.indexOf(list) + " has the following terms:");
+			for (String term : list) {
+				System.out.println(term);
+			}
+		}
+		*/
+		
+		List<Double> vector1 = new ArrayList<Double>();
+		List<Double> vector2 = new ArrayList<Double>();
+		
+		// Create vector for each document
+		for (String word : bagOfWords) {
+			double value = 0.0;
+			if (doc1terms.contains(word)) {
+				value = termFrequency(doc1terms, word);
+			}
+			vector1.add(value);
+			
+			value = 0.0;
+			if (doc2terms.contains(word)) {
+				value = termFrequency(doc2terms, word);
+			}
+			vector2.add(value);
+		}
+		
+		/*
+		// Display document vectors
+		for (int i = 0; i < docs.size(); i++) {
+			System.out.println("-----------------------------------------------------------------");
+			for (int j = 0; j < bagOfWords.size(); j++) {
+				System.out.println(j + " - " + bagOfWords.get(j) + " ------ " + vectors.get(i).get(j));
+			}
+		}
+		*/ 
+		
+		if (cosineSimilarity(vector1, vector2, bagOfWords.size()) > 0.95)
+			return true;
+		else
+			return false;
+			
+	}
 
 }

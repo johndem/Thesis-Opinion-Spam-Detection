@@ -32,17 +32,20 @@ public class RatingDeviation {
 		for (Review review : reviews) {
 			newMeanRating = newMeanRating - review.getRating();
 		}
-		newMeanRating = newMeanRating / (numOfReviews - reviews.size());
 		
-		for (Review review : reviews) {
-			double rating = review.getRating();
-			double deviation = Math.abs(newMeanRating - rating);
-			double normalDeviation = deviation / (scale-1);
-			totalNormDeviation = totalNormDeviation + normalDeviation;
-			//System.out.println("Rating " + rating + " has a deviation of " + deviation + " (norm. " + normalDeviation + ")");
+		if (numOfReviews - reviews.size() != 0) {
+			newMeanRating = newMeanRating / (numOfReviews - reviews.size());
+			
+			for (Review review : reviews) {
+				double rating = review.getRating();
+				double deviation = Math.abs(newMeanRating - rating);
+				double normalDeviation = deviation / (scale-1);
+				totalNormDeviation = totalNormDeviation + normalDeviation;
+				//System.out.println("Rating " + rating + " has a deviation of " + deviation + " (norm. " + normalDeviation + ")");
+			}
+			
+			totalNormDeviation = totalNormDeviation / reviews.size();
 		}
-		
-		totalNormDeviation = totalNormDeviation / reviews.size();
 		
 		return totalNormDeviation;
 	}

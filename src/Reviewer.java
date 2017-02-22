@@ -95,7 +95,7 @@ public class Reviewer {
 		
 		// Calculate duration between reviewer's first and last review
 		int daysOfActivity = (int) ChronoUnit.DAYS.between(reviewingHistory.get(0).getDate(), reviewingHistory.get(reviewingHistory.size()-1).getDate());
-		if (reviews.size() > 5 && daysOfActivity < normalActivityDuration) {
+		if (reviews.size() > 4 && daysOfActivity < normalActivityDuration) {
 			burstyReviewer = 1.0;
 		}
 		
@@ -122,10 +122,12 @@ public class Reviewer {
 			sum = sum + entry.getValue();
 		}
 		
-		if (reviews.size() != reviewingHistory.size())
-			averateReviewsPerProduct = (double) sum / reviewsPerProduct.size();
-		else
-			averateReviewsPerProduct = 1.0;
+		averateReviewsPerProduct = (double) sum / reviewsPerProduct.size();
+		
+//		if (reviews.size() != reviewingHistory.size())
+//			averateReviewsPerProduct = (double) sum / reviewsPerProduct.size();
+//		else
+//			averateReviewsPerProduct = 1.0;
 		
 		//System.out.println("Reviewer writes on average " + averateReviewsPerProduct + " reviews per product.");
 	}
@@ -176,7 +178,7 @@ public class Reviewer {
 		
 		calculateRatingExtremity();
 		
-		historyScore = burstyReviewer + 0.5 * averateReviewsPerProduct + 0.25 * exRatingRatio;
+		historyScore = 2 * burstyReviewer + 0.5 * averateReviewsPerProduct + 0.25 * exRatingRatio;
 		return historyScore;
 	}
 	

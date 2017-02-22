@@ -10,11 +10,48 @@ import org.bson.Document;
 public class PreprocessDataset {
 	
 	private MongoDB mongo;
-	private static final String filePath = "D:\\Opinion Spam Detection data\\lie_dataset\\reviewsNew.txt"; // "C:\\Users\\John\\Documents\\Πανεπιστήμιο\\Διπλωματική\\Datasets\\Reviews\\reviews.txt"
-	
+	private static final String filePath = "D:\\Opinion Spam Detection data\\lie_dataset\\reviewsNew.txt";
+	private static final String filePath2 = "D:\\Opinion Spam Detection data\\lie_dataset\\productInfoXML-reviewed-mProducts.txt";
 	
 	public PreprocessDataset() {
 		mongo = new MongoDB();
+	}
+	
+	public void processMproducts() {
+		
+		try (BufferedReader br = new BufferedReader(new FileReader(filePath2))) {
+		    String line;
+		    
+		    int cursor_pos = 0;
+		    while ((line = br.readLine()) != null) {
+		    	// Process the line
+		    	if (line.equals("BREAK-REVIEWED")) {
+		    		cursor_pos = 0;
+		    		continue;
+		    	}
+		    	
+		    	if (cursor_pos == 0) {
+		    		String[] lineTokens = line.split("\\t");	    	
+			    	String productId = lineTokens[0];
+			    	
+			    	Document mProduct = new Document();
+			    	mProduct.put("pid", productId);
+			    	mongo.insertMproduct(mProduct);
+		    	}
+//		    	else if (cursor_pos == 1) {
+//		    		
+//		    	}
+		    	
+		    	cursor_pos++;
+		    	if (cursor_pos == 2)
+		    		cursor_pos = 0;
+	
+		    }
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public void processReviews() {
@@ -128,6 +165,7 @@ public class PreprocessDataset {
 	    		Document doc = new Document();
 		    	doc.put("pid", product.getKey());
 		    	doc.put("reviews", product.getValue());
+		    	doc.put("mProduct", "0");
 		    	
 		    	mongo.insertProduct(doc);
 		    }

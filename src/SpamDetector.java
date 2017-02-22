@@ -41,6 +41,7 @@ public class SpamDetector {
 	
 	private void readReviewInput() {
 		
+		
 		FindIterable<Document> iterable = mongo.retrieveProductReviews(productToFilter);
 		
 		iterable.forEach(new Block<Document>() {
@@ -66,6 +67,7 @@ public class SpamDetector {
 				
 			}
 		});
+		
 		
 //		try{
 //		    PrintWriter writer = new PrintWriter("testing.txt", "UTF-8");
@@ -253,7 +255,7 @@ public class SpamDetector {
 			iterable.forEach(new Block<Document>() {
 				@Override
 				public void apply(final Document document) {
-					double score = Double.parseDouble(document.get("score").toString());
+					double score = Double.parseDouble(document.get("score2").toString());
 					
 					if (score == 0.0)
 						mongo.updateReviewerScore(entry.getKey(), String.valueOf(entry.getValue().analyzeReviewingHistory()));
@@ -268,8 +270,12 @@ public class SpamDetector {
 		}
 		
 		
-		for (Review review : reviewList)
-			mongo.updateReviewScore(review.getMongoId(), review.calculateReviewSpamScore(reviewers.get(review.getReviewerId()).getSpamicity()));
+		for (Review review : reviewList) {
+			double x = review.calculateReviewSpamScore(reviewers.get(review.getReviewerId()).getSpamicity());
+			System.out.println(x);
+			mongo.updateReviewScore(review.getMongoId(), x);
+		}
+			
 		
 		
 		/*

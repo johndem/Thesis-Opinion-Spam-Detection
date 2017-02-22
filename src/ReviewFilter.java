@@ -16,55 +16,75 @@ public class ReviewFilter {
 	}
 	
 	public void filterProductReviews() throws IOException {
-//		FindIterable<Document> iterable = mongo.retrieveProductsCollection().noCursorTimeout(true);
-//		iterable.forEach(new Block<Document>() {
-//			@Override
-//			public void apply(final Document document) {
-//				String product_id = document.get("pid").toString();
-//				//System.out.println("Annotating reviews for product: " + product_id);
-//				
-//				try {
-//					new SpamDetector(mongo, product_id).performSpamDetection();
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
+		FindIterable<Document> iterable = mongo.retrieveProductsCollection().noCursorTimeout(true);
+		iterable.forEach(new Block<Document>() {
+			@Override
+			public void apply(final Document document) {
+				String product_id = document.get("pid").toString();
+				System.out.println(product_id);
+//				int numOfReviews = Integer.parseInt(document.get("reviews").toString());
+//				String mProduct = document.get("mProduct").toString();
+				
+//				if (mProduct.equals("1") && numOfReviews > 2) {
+				try {
+					new SpamDetector(mongo, product_id).performSpamDetection();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 //				}
-//				
-//			}
-//		});
+				
+			}
+		});
 		
-		
+		System.out.println("1st phase completed");
 		
 		// Extract top-K and bottom-K reviews for review text classification evaluation purposes
 		Results res = new Results();
-		int K = 10000;
+		int K = 6000;
 		
 		// Collect top K reviews with highest spam score to be used as spam class
 		List<String> topKreviews = new ArrayList<String>();
-		FindIterable<Document> iter = mongo.retrieveTopKDocuments(K);
+		FindIterable<Document> iter = mongo.retrieveTopKDocuments(K).noCursorTimeout(true);
 		iter.forEach(new Block<Document>() {
 			@Override
 			public void apply(final Document document) {
 				String content = document.get("content").toString();
-				double score = Double.parseDouble(document.get("score").toString());
-				//System.out.println(score);
-				if (!topKreviews.contains(content)) // Omit if duplicate
+				//double score = Double.parseDouble(document.get("score").toString());
+//				if (!topKreviews.contains(content)) { // Omit if duplicate
+//					topKreviews.add(content);
+//					//System.out.println(score);
+//				}
+				
+				boolean toBeAdded = true;
+				int count = topKreviews.size() - 1;
+				while (count > -1 && toBeAdded) {
+					if (ContentSimilarity.similar(content, topKreviews.get(count))) {
+						toBeAdded = false;
+					}
+					count--;
+				}
+				if (toBeAdded) {
 					topKreviews.add(content);
+					//System.out.println(score);
+				}
+				
 			}
 		});
 		
 		// Collect bottom K reviews with lowest spam score to be used as honest class
 		List<String> bottomKreviews = new ArrayList<String>();
-		FindIterable<Document> it = mongo.retrieveBottomKDocuments(K);
+		FindIterable<Document> it = mongo.retrieveBottomKDocuments(K).noCursorTimeout(true);
 		it.forEach(new Block<Document>() {
 			@Override
 			public void apply(final Document document) {
 				String content = document.get("content").toString();
-				double score = Double.parseDouble(document.get("score").toString());
-				//System.out.println(score);
-				bottomKreviews.add(content);
-				if (!bottomKreviews.contains(content)) // Omit if duplicate
+				//double score = Double.parseDouble(document.get("score").toString());
+				//bottomKreviews.add(content);
+				if (!bottomKreviews.contains(content)) { // Omit if duplicate
 					bottomKreviews.add(content);
+					//System.out.println(score);
+				}
 			}
 		});
 		
@@ -92,11 +112,11 @@ public class ReviewFilter {
 			}
 		}
 		
-		
-		System.out.println("Top K list has " + topKreviews.size() + " reviews, while bottom K list has " + bottomKreviews.size() + " reviews.");
+//		System.out.println("Top K list has " + topKreviews.size() + " reviews, while bottom K list has " + bottomKreviews.size() + " reviews.");
 		res.saveReviewInstances(topKreviews, true);
 		res.saveReviewInstances(bottomKreviews, false);
 		
+		System.out.println("2nd phase completed");
 	}
 	
 }
