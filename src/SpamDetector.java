@@ -35,13 +35,12 @@ public class SpamDetector {
 		reviewList = new ArrayList<Review>();
 		reviewers = new HashMap<String, Reviewer>();
 		
-		classifier = new Classification(1);
+		//classifier = new Classification(1);
 		bp = new BurstPattern();
 	}
 	
 	private void readReviewInput() {
-		
-		
+				
 		FindIterable<Document> iterable = mongo.retrieveProductReviews(productToFilter);
 		
 		iterable.forEach(new Block<Document>() {
@@ -68,7 +67,6 @@ public class SpamDetector {
 			}
 		});
 		
-		
 //		try{
 //		    PrintWriter writer = new PrintWriter("testing.txt", "UTF-8");
 //		    
@@ -82,38 +80,36 @@ public class SpamDetector {
 //		   // do something
 //		}
 		
-		/*
 		// Read review and reviewer data for a specific product and store in a respective structures
-		try (BufferedReader br = new BufferedReader(new FileReader("testing.txt"))) {
-		    String line;
-		    
-		    while ((line = br.readLine()) != null) {
-		    	// Process the line
-		    	String[] lineTokens = line.split("\\t");
-		    	
-		    	String reviewerId = lineTokens[0];
-		    	String creationDate = lineTokens[1];
-		    	double rating = Double.parseDouble(lineTokens[2]);
-		    	String reviewText = lineTokens[3];
-		    	
-		    	
-		    	// Add review to List
-		    	Review review = new Review("", reviewerId, rating, creationDate, reviewText);
-		    	reviewList.add(review);
-		    	
-		    	if (!reviewers.containsKey(reviewerId)) { // If encounter reviewer for first time, add to HashMap
-					reviewers.put(reviewerId, new Reviewer());
-					reviewers.get(reviewerId).addReview(review);
-				}
-				else { // If reviewer already exists, simply add their review
-					reviewers.get(reviewerId).addReview(review);
-				}
-		    }
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		*/
+//		try (BufferedReader br = new BufferedReader(new FileReader("testing.txt"))) {
+//		    String line;
+//		    
+//		    while ((line = br.readLine()) != null) {
+//		    	// Process the line
+//		    	String[] lineTokens = line.split("\\t");
+//		    	
+//		    	String reviewerId = lineTokens[0];
+//		    	String creationDate = lineTokens[1];
+//		    	double rating = Double.parseDouble(lineTokens[2]);
+//		    	String reviewText = lineTokens[3];
+//		    	
+//		    	
+//		    	// Add review to List
+//		    	Review review = new Review("", reviewerId, rating, creationDate, reviewText);
+//		    	reviewList.add(review);
+//		    	
+//		    	if (!reviewers.containsKey(reviewerId)) { // If encounter reviewer for first time, add to HashMap
+//					reviewers.put(reviewerId, new Reviewer());
+//					reviewers.get(reviewerId).addReview(review);
+//				}
+//				else { // If reviewer already exists, simply add their review
+//					reviewers.get(reviewerId).addReview(review);
+//				}
+//		    }
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 		// Sort reviews in List from oldest to latest
 		Collections.sort(reviewList, new Comparator<Review>() {
@@ -251,11 +247,12 @@ public class SpamDetector {
 			
 			
 			// Examine reviewer's general activity and reviewing history
+			//entry.getValue().analyzeReviewingHistory();
 			FindIterable<Document> iterable = mongo.retrieveReviewer(entry.getKey());
 			iterable.forEach(new Block<Document>() {
 				@Override
 				public void apply(final Document document) {
-					double score = Double.parseDouble(document.get("score2").toString());
+					double score = Double.parseDouble(document.get("score").toString());
 					
 					if (score == 0.0)
 						mongo.updateReviewerScore(entry.getKey(), String.valueOf(entry.getValue().analyzeReviewingHistory()));
@@ -272,20 +269,18 @@ public class SpamDetector {
 		
 		for (Review review : reviewList) {
 			double x = review.calculateReviewSpamScore(reviewers.get(review.getReviewerId()).getSpamicity());
-			System.out.println(x);
+			//System.out.println(x);
 			mongo.updateReviewScore(review.getMongoId(), x);
 		}
 			
 		
-		
 		/*
+		// Display product filtering results
 		System.out.println("Number of reviews: " + reviewList.size());
 		System.out.println("Number of reviewers: " + reviewers.size());
 		
-		// Display review spam scores
 		int counter = 1;
 		for (Review review : reviewList) {
-			review.calculateReviewSpamScore(reviewers.get(review.getReviewerId()).getSpamicity());
 			if (review.getReviewSpamScore() > 3) {
 				System.out.println(counter + ". Score: " + review.getReviewSpamScore() + " (" + review.getTestDate() + ")");
 				System.out.println("Review stats:");
@@ -298,30 +293,6 @@ public class SpamDetector {
 			
 		}
 		*/
-		
-		/*
-		// Display reviewer spam scores
-		int counter = 1;
-		for (HashMap.Entry<String, Reviewer> entry : reviewers.entrySet()) {
-			if (entry.getValue().getSpamicity() > 7.0) {
-				System.out.println(counter + ". Reviewer " + entry.getKey() + " has a score of: " + entry.getValue().getSpamicity());
-				entry.getValue().printReviewingStats();
-				System.out.println("-------------------------------------------------------------------");
-				counter++;
-				
-//				if (entry.getKey().equals("A6WXVSLYV2F45") || entry.getKey().equals("A1C9ZY8FRWQ0TX")) {
-//					System.out.println(counter + ". Reviewer " + entry.getKey() + " has a score of: " + entry.getValue().getSpamicity());
-//					entry.getValue().printReviewingStats();
-//					entry.getValue().printReviewerHist();
-//					System.out.println("-------------------------------------------------------------------");
-//					counter++;
-//				}
-				
-			}
-			
-		}
-		*/
-		
 	}	
 
 }

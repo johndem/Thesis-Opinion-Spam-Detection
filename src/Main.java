@@ -15,6 +15,15 @@ public class Main {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		
+		/*
+		// Process and store review dataset in database
+		PreprocessDataset pData = new PreprocessDataset();
+		pData.processReviews();
+		pData.processReviewers();
+		pData.processProducts();
+		*/
+		
 
 		ReviewFilter rFilter = new ReviewFilter();
 		try {
@@ -24,11 +33,24 @@ public class Main {
 			e.printStackTrace();
 		}
 		
+		
+		/*
+		// Experiment on a single product
+		MongoDB mongo= new MongoDB();
+		SpamDetector sd = new SpamDetector(mongo, "B0000TB03W");
+		try {
+			sd.performSpamDetection();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		*/
+		
+		
 		/*
 		// For testing purposes
 		MongoDB mongo= new MongoDB();
 		FindIterable<Document> iterable = mongo.retrieveProductsCollection();
-		
 		iterable.forEach(new Block<Document>() {
 			@Override
 			public void apply(final Document document) {
@@ -44,22 +66,7 @@ public class Main {
 		System.out.println("Products: " + count + ", Reviews: " + total);
 		*/
 		
-		/*
-		MongoDB mongo= new MongoDB();
-		SpamDetector sd = new SpamDetector(mongo, "");
-		try {
-			sd.performSpamDetection();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		*/
 		
-		/*
-		// Process and store review dataset in database
-		PreprocessDataset pData = new PreprocessDataset();
-		pData.processReviewers();
-		*/
 		
 	}
 

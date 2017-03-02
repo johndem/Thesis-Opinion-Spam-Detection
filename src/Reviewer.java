@@ -14,8 +14,6 @@ public class Reviewer {
 	
 	private List<Review> reviews;
 	
-	private double reviewsScore;
-	
 	private double avgRatingDeviation;
 	private double reviewContentSimilarity;
 	
@@ -37,7 +35,6 @@ public class Reviewer {
 		historyScore = 0;
 		reviews = new ArrayList<Review>();
 		
-		reviewsScore = 0.0;
 		reviewContentSimilarity = 0.0;
 		burstyReviewer = 0.0;
 		totalBurstyReviews = 0;
@@ -59,10 +56,6 @@ public class Reviewer {
 	
 	public void setAvgRatingDeviation(double dev) {
 		avgRatingDeviation = dev;
-	}
-	
-	public void addReviewScore(double score) {
-		reviewsScore = reviewsScore + score;
 	}
 	
 	public double getAvgRatingDeviation() {
@@ -95,7 +88,7 @@ public class Reviewer {
 		
 		// Calculate duration between reviewer's first and last review
 		int daysOfActivity = (int) ChronoUnit.DAYS.between(reviewingHistory.get(0).getDate(), reviewingHistory.get(reviewingHistory.size()-1).getDate());
-		if (reviews.size() > 4 && daysOfActivity < normalActivityDuration) {
+		if (reviews.size() > 5 && daysOfActivity < normalActivityDuration) {
 			burstyReviewer = 1.0;
 		}
 		
@@ -122,12 +115,10 @@ public class Reviewer {
 			sum = sum + entry.getValue();
 		}
 		
-		averateReviewsPerProduct = (double) sum / reviewsPerProduct.size();
-		
-//		if (reviews.size() != reviewingHistory.size())
-//			averateReviewsPerProduct = (double) sum / reviewsPerProduct.size();
-//		else
-//			averateReviewsPerProduct = 1.0;
+		if (reviews.size() != reviewingHistory.size())
+			averateReviewsPerProduct = (double) sum / reviewsPerProduct.size();
+		else
+			averateReviewsPerProduct = 1.0;
 		
 		//System.out.println("Reviewer writes on average " + averateReviewsPerProduct + " reviews per product.");
 	}
@@ -178,7 +169,7 @@ public class Reviewer {
 		
 		calculateRatingExtremity();
 		
-		historyScore = 2 * burstyReviewer + 0.5 * averateReviewsPerProduct + 0.25 * exRatingRatio;
+		historyScore = burstyReviewer + 0.5 * averateReviewsPerProduct + 0.5 * exRatingRatio;
 		return historyScore;
 	}
 	
@@ -201,7 +192,7 @@ public class Reviewer {
 		if (reviews.size() < 3)
 			totalBurstyReviews = 0;
 		
-		spamicity = 0.125 * avgRatingDeviation + 1.5 * reviewContentSimilarity + 0.5 * ((double) totalBurstyReviews / reviews.size()) + 0.5 * reviews.size() + historyScore;
+		spamicity = 0.125 * avgRatingDeviation + 1.5 * reviewContentSimilarity + 1.5 * ((double) totalBurstyReviews / reviews.size()) + 0.5 * reviews.size() + historyScore;
 	}
 	
 	public double getSpamicity() {

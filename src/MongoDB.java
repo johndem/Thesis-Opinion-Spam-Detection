@@ -18,8 +18,8 @@ public class MongoDB {
 	public MongoDB() {
 		mongoClient = new MongoClient("localhost");
 		database = mongoClient.getDatabase("opinionSpamDetectionDb");
-		reviewsCol = database.getCollection("reviews1");
-		reviewersCol = database.getCollection("reviewers1");
+		reviewsCol = database.getCollection("reviews");
+		reviewersCol = database.getCollection("reviewers");
 		productsCol = database.getCollection("products");
 		mProductsCol = database.getCollection("mProducts");
 	}
@@ -41,12 +41,12 @@ public class MongoDB {
 	
 	// Update review spam score in reviews collection
 	public void updateReviewScore(String id, double score) {
-		reviewsCol.updateOne(new Document("_id", new ObjectId(id)), new Document("$set", new Document("score2", score)));
+		reviewsCol.updateOne(new Document("_id", new ObjectId(id)), new Document("$set", new Document("score", score)));
 	}
 	
 	// Update reviewer history score in reviewers collection
 	public void updateReviewerScore(String userid, String score) {
-		reviewersCol.updateOne(new Document("userid", userid), new Document("$set", new Document("score2", score)));
+		reviewersCol.updateOne(new Document("userid", userid), new Document("$set", new Document("score", score)));
 	}
 	
 	// Return all reviews for product ID
@@ -87,20 +87,21 @@ public class MongoDB {
 	// Return all products from products collection
 	public FindIterable<Document> retrieveProductsCollection() {
 		FindIterable<Document> iterable = productsCol.find(new Document("reviews", new Document("$gt", 50)));
+		//FindIterable<Document> iterable = productsCol.find(new Document("mProduct", "1"));
 		
 		return iterable;
 	}
 	
 	// Return top-K reviews according to assigned spam score
 	public FindIterable<Document> retrieveTopKDocuments(int k) {
-		FindIterable<Document> iterable = reviewsCol.find().sort(new Document("score2", -1)).limit(k);
+		FindIterable<Document> iterable = reviewsCol.find().sort(new Document("score", -1)).limit(k);
 		
 		return iterable;
 	}
 	
 	// Return bottom-K reviews according to assigned spam score
 	public FindIterable<Document> retrieveBottomKDocuments(int k) {
-		FindIterable<Document> iterable = reviewsCol.find(new Document("score2", new Document("$gt", 0.0))).sort(new Document("score", 1)).limit(k);
+		FindIterable<Document> iterable = reviewsCol.find(new Document("score", new Document("$gt", 0.0))).sort(new Document("score", 1)).limit(k);
 		
 		return iterable;
 	}
