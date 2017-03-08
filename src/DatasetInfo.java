@@ -12,11 +12,13 @@ public class DatasetInfo {
 	private MongoDB mongo;
 	private HashMap<String, List<String>> reviewsPerAuthor;
 	private HashMap<String, List<Double>> authorRatings;
+	private int counter;
 	
 	public DatasetInfo() {
 		mongo = new MongoDB();
 		reviewsPerAuthor = new HashMap<String, List<String>>();
 		authorRatings = new HashMap<String, List<Double>>();
+		counter = 0;
 	}
 	
 	public void findAverageReviewerProliferation() {
@@ -102,6 +104,20 @@ public class DatasetInfo {
 		}
 		
 		System.out.println("Average extreme rating ratio among authors: " + (double) avgExtremeRatingRatio / authorRatings.size());
+	}
+	
+	public void measureTotalReviews() {
+		FindIterable<Document> iterable = mongo.retrieveProductsCollection();
+		
+		iterable.forEach(new Block<Document>() {
+			@Override
+			public void apply(final Document document) {
+				int reviews = Integer.parseInt(document.get("reviews").toString());
+				counter += reviews;
+			}
+		});
+		
+		System.out.println("Total amount of reviews: " + counter);
 	}
 
 }

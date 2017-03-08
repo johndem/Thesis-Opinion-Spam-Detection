@@ -95,17 +95,19 @@ public class Reviewer {
 		//System.out.println("Reviewer has " + daysOfActivity + " days of activity.");
 	}
 	
-	private void extractAverageProliferation() {
+	private void extractAverageProliferation(String productToFilter) {
 		HashMap<String, Integer> reviewsPerProduct = new HashMap<String, Integer>();
 		
 		for (Review review : reviewingHistory) {
-			if (reviewsPerProduct.containsKey(review.getProductId())) {
-				int value = reviewsPerProduct.get(review.getProductId());
-				value++;
-				reviewsPerProduct.put(review.getProductId(), value);
-			}
-			else {
-				reviewsPerProduct.put(review.getProductId(), 1);
+			if (!review.getProductId().equals(productToFilter)) {
+				if (reviewsPerProduct.containsKey(review.getProductId())) {
+					int value = reviewsPerProduct.get(review.getProductId());
+					value++;
+					reviewsPerProduct.put(review.getProductId(), value);
+				}
+				else {
+					reviewsPerProduct.put(review.getProductId(), 1);
+				}
 			}
 		}
 		
@@ -160,12 +162,12 @@ public class Reviewer {
 		}
 	}
 	
-	public double analyzeReviewingHistory() {
+	public double analyzeReviewingHistory(String productToFilter) {
 		//printReviewerHist();
 		
 		measureReviewingBurstiness();
 		
-		extractAverageProliferation();
+		extractAverageProliferation(productToFilter);
 		
 		calculateRatingExtremity();
 		

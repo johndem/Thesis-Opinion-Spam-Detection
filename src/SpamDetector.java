@@ -247,12 +247,13 @@ public class SpamDetector {
 			
 			
 			// Examine reviewer's general activity and reviewing history
-			//entry.getValue().analyzeReviewingHistory();
+			entry.getValue().analyzeReviewingHistory(productToFilter);
+			/*
 			FindIterable<Document> iterable = mongo.retrieveReviewer(entry.getKey());
 			iterable.forEach(new Block<Document>() {
 				@Override
 				public void apply(final Document document) {
-					double score = Double.parseDouble(document.get("score").toString());
+					double score = Double.parseDouble(document.get("score2").toString());
 					
 					if (score == 0.0)
 						mongo.updateReviewerScore(entry.getKey(), String.valueOf(entry.getValue().analyzeReviewingHistory()));
@@ -260,6 +261,7 @@ public class SpamDetector {
 						entry.getValue().setHistoryScore(score);
 				}
 			});
+			*/
 			
 			
 			// Measure reviewer's spam score

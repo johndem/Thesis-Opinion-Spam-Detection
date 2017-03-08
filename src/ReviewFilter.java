@@ -10,14 +10,13 @@ import com.mongodb.client.FindIterable;
 public class ReviewFilter {
 	
 	private MongoDB mongo;
-	int halp = 0;
 
 	public ReviewFilter() {
 		mongo = new MongoDB();
 	}
 	
 	public void filterProductReviews() throws IOException {
-		/*
+		
 		FindIterable<Document> iterable = mongo.retrieveProductsCollection().noCursorTimeout(true);
 		iterable.forEach(new Block<Document>() {
 			@Override
@@ -36,9 +35,8 @@ public class ReviewFilter {
 			}
 		});
 		
-		
 		System.out.println("1st phase completed");
-		*/
+		
 		
 		
 		
