@@ -19,6 +19,7 @@ public class Review {
 	
 	private double contentLabel;
 	private double contentSimilarityInBurst;
+	private double ratingDeviation;
 	private double reviewSpamScore;
 	
 	public Review(String mongo_id, String reviewer_id, double rating, String creationDate, String reviewText) {
@@ -33,14 +34,16 @@ public class Review {
 		
 		contentLabel = 0.0;
 		contentSimilarityInBurst = 0.0;
+		ratingDeviation = 0.0;
 		reviewSpamScore = 0.0;
 		
 		testDate = creationDate;
 	}
 	
-	public Review(double rating, String creationDate, String product_id) {
+	public Review(double rating, String creationDate, String product_id, String reviewText) {
 		this.rating = rating;
 		this.product_id = product_id;
+		this.reviewText = reviewText;
 		
 		formatter = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
 		this.creationDate = LocalDate.parse(creationDate, formatter);
@@ -88,8 +91,16 @@ public class Review {
 		this.contentSimilarityInBurst = contentSimilarityInBurst;
 	}
 	
+	public void setRatingDeviation(double dev) {
+		ratingDeviation = dev;
+	}
+	
+	public double getRatingDeviation() {
+		return ratingDeviation;
+	}
+	
 	public double calculateReviewSpamScore(double reviewerScore) {
-		reviewSpamScore = 0.5 * contentLabel + 2 * contentSimilarityInBurst + reviewerScore;
+		reviewSpamScore = 0.5 * contentLabel + 2 * contentSimilarityInBurst + 1 * ratingDeviation + reviewerScore;
 		return reviewSpamScore;
 	}
 	
@@ -102,9 +113,14 @@ public class Review {
 	}
 	
 	public void printReviewStats() {
-		//System.out.println("Reviews Score: " + reviewsScore);
-		System.out.println("Content Label: " + contentLabel);
+		//System.out.println("Content Label: " + contentLabel);
 		System.out.println("CSB: " + contentSimilarityInBurst);
+		System.out.println("Rating Deviation: " + ratingDeviation);
+	}
+	
+	public String getReviewStats() {
+		return "CSB: " + contentSimilarityInBurst + " (" + 2 * contentSimilarityInBurst + ")" + "\n" +
+			"Rating Deviation: " + ratingDeviation + " (" + 1 * ratingDeviation + ")" + "\n";
 	}
 
 }

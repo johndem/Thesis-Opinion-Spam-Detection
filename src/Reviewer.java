@@ -18,12 +18,14 @@ public class Reviewer {
 	private double reviewContentSimilarity;
 	
 	private int totalBurstyReviews;
+	private double burstyActivity;
 	
-	private double burstyReviewer;
+	private double historyBurstiness;
 	private double averateReviewsPerProduct;
 	private double exRatingRatio;
 	private double histReviewContentSimilarity;
 	
+	double penalty;
 	
 	private List<Review> reviewingHistory;
 	private DateTimeFormatter formatter;
@@ -32,15 +34,18 @@ public class Reviewer {
 	
 	public Reviewer() {
 		spamicity = 0.0;
-		historyScore = 0;
+		historyScore = 0.0;
 		reviews = new ArrayList<Review>();
 		
 		reviewContentSimilarity = 0.0;
-		burstyReviewer = 0.0;
+		historyBurstiness = 0.0;
+		burstyActivity = 0.0;
 		totalBurstyReviews = 0;
 		exRatingRatio = 0.0;
 		histReviewContentSimilarity = 0.0;
 		averateReviewsPerProduct = 0.0;
+		
+		penalty = 0.0;
 		
 		reviewingHistory = new ArrayList<Review>();
 		formatter = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
@@ -89,7 +94,7 @@ public class Reviewer {
 		// Calculate duration between reviewer's first and last review
 		int daysOfActivity = (int) ChronoUnit.DAYS.between(reviewingHistory.get(0).getDate(), reviewingHistory.get(reviewingHistory.size()-1).getDate());
 		if (reviews.size() > 5 && daysOfActivity < normalActivityDuration) {
-			burstyReviewer = 1.0;
+			historyBurstiness = 1.0;
 		}
 		
 		//System.out.println("Reviewer has " + daysOfActivity + " days of activity.");
@@ -127,6 +132,7 @@ public class Reviewer {
 	
 	private void calculateRatingExtremity() {
 		int extremeRatings = 0;
+
 		for (Review review : reviewingHistory) {
 			if (review.getRating() == 1.0 || review.getRating() == 5.0)
 				extremeRatings++;
@@ -137,6 +143,7 @@ public class Reviewer {
 		//System.out.println("Reviewer has an extreme rating ratio of " + exRatingRatio);
 	}
 	
+	/*
 	private void measureHistoryContentSimilarity() {
 		if (reviewingHistory.size() > 1) {
 			List<String> reviewContents = new ArrayList<String>();
@@ -161,6 +168,7 @@ public class Reviewer {
 			histReviewContentSimilarity = histReviewContentSimilarity / counter;
 		}
 	}
+	*/
 	
 	public double analyzeReviewingHistory(String productToFilter) {
 		//printReviewerHist();
@@ -171,7 +179,7 @@ public class Reviewer {
 		
 		calculateRatingExtremity();
 		
-		historyScore = burstyReviewer + 0.5 * averateReviewsPerProduct + 0.5 * exRatingRatio;
+		historyScore = historyBurstiness + 0.5 * averateReviewsPerProduct + 0.5 * exRatingRatio;
 		return historyScore;
 	}
 	
@@ -191,10 +199,13 @@ public class Reviewer {
 	}
 	
 	public void measureReviewerSpamicity() {
-		if (reviews.size() < 3)
-			totalBurstyReviews = 0;
+		if (totalBurstyReviews >= 3)
+			burstyActivity = 1.0;
 		
-		spamicity = 0.125 * avgRatingDeviation + 1.5 * reviewContentSimilarity + 1.5 * ((double) totalBurstyReviews / reviews.size()) + 0.5 * reviews.size() + historyScore;
+		if (reviews.size() > 1 && reviewContentSimilarity > 0.99)
+			penalty += 1.0;
+		
+		spamicity = 1.5 * reviewContentSimilarity + burstyActivity + 0.5 * reviews.size() + historyScore + penalty; // 0.5 * avgRatingDeviation + 
 	}
 	
 	public double getSpamicity() {
@@ -202,14 +213,25 @@ public class Reviewer {
 	}
 	
 	public void printReviewingStats() {
-		System.out.println("Average Rating Deviation: " + avgRatingDeviation);
 		System.out.println("Review Content Similarity: " + reviewContentSimilarity);
 		System.out.println("Number of Reviews: " + reviews.size());
-		System.out.println("Ratio of Bursty Reviews: " + totalBurstyReviews + " / " + reviews.size() + " = " + ((double) totalBurstyReviews / reviews.size()));
-		System.out.println("(H) Bursty Reviewing: " + burstyReviewer);
+		System.out.println("Bursty Acivity on product: " + burstyActivity);
+		System.out.println("(H) Overall Bursty Reviewing: " + historyBurstiness);
 		System.out.println("(H) Average Number of Reviews per Product: " + averateReviewsPerProduct);
 		System.out.println("(H) Extreme Rating Ratio: " + exRatingRatio);
-		System.out.println("H: " + historyScore + " (" + reviewingHistory.size() + ")");
+		System.out.println("H: " + historyScore + " (" + reviewingHistory.size() + " - " + (reviewingHistory.size()-reviews.size()) + ")");
+	}
+	
+	public String getReviewingStats() {
+		return  
+				"Review Content Similarity: " + reviewContentSimilarity + " (" + 1.5 * reviewContentSimilarity + ")" + "\n" +
+				"Number of Reviews: " + reviews.size() + " (" + 0.5 * reviews.size() + ")" + "\n" +
+				"Bursty Activity on product: " + burstyActivity + "\n" +
+				"(H) Overall Bursty Reviewing: " + historyBurstiness + "\n" + 
+				"(H) Average Number of Reviews per Product: " + averateReviewsPerProduct + " (" + 0.5 * averateReviewsPerProduct + ")" + "\n" +
+				"(H) Extreme Rating Ratio: " + exRatingRatio + " (" + 0.5 * exRatingRatio + ")" + "\n" + 
+				"H: " + historyScore + " (" + reviewingHistory.size() + " - " + (reviewingHistory.size()-reviews.size()) + ")" + "\n" +
+				"Penalty: " + penalty;
 	}
 
 }

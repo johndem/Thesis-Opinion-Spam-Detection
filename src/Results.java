@@ -12,7 +12,7 @@ public class Results {
 		
 	}
 	
-	public void saveReviewInstances(List<String> reviews, boolean spam) throws IOException {
+	public void saveReviewInstances(List<String> reviews, boolean spam, String output) throws IOException {
 		
 		int counter = 1;
 		
@@ -26,7 +26,7 @@ public class Results {
 		
 		for (String review : reviews) {
 			List<String> lines = Arrays.asList(review);
-			String filename = "output/" + prefix + String.valueOf(counter) + ".txt";
+			String filename = output + prefix + String.valueOf(counter) + ".txt";
 			Path file = Paths.get(filename);
 			Files.write(file, lines, Charset.forName("UTF-8"));
 			counter++;

@@ -10,9 +10,6 @@ import com.mongodb.client.FindIterable;
 
 public class Main {
 	
-	static int total = 0;
-	static int count = 0;
-
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
@@ -31,13 +28,13 @@ public class Main {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
+		}	
+			
 		
 		/*
 		// Experiment on a single product
 		MongoDB mongo= new MongoDB();
-		SpamDetector sd = new SpamDetector(mongo, "B0000TB03W");
+		SpamDetector sd = new SpamDetector(mongo, "1400046610"); // "B0000TB03W"
 		try {
 			sd.performSpamDetection();
 		} catch (Exception e) {
@@ -45,28 +42,6 @@ public class Main {
 			e.printStackTrace();
 		}
 		*/
-		
-		
-		/*
-		// For testing purposes
-		MongoDB mongo= new MongoDB();
-		FindIterable<Document> iterable = mongo.retrieveProductsCollection();
-		iterable.forEach(new Block<Document>() {
-			@Override
-			public void apply(final Document document) {
-				int sum = Integer.parseInt(document.get("reviews").toString());
-				String pid = document.get("pid").toString();
-				String m = document.get("mProduct").toString();
-				if (m.equals("1") && sum > 2) {
-					count++;
-					total = total + sum;
-				}
-			}
-		});
-		System.out.println("Products: " + count + ", Reviews: " + total);
-		*/
-		
-		
 		
 	}
 

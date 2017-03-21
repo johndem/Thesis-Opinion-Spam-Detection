@@ -39,14 +39,24 @@ public class MongoDB {
 		productsCol.insertOne(doc);
 	}
 	
+	// Update review spam score and details in reviews collection
+	public void updateReviewScore(String id, double score, String info) {
+		reviewsCol.updateOne(new Document("_id", new ObjectId(id)), new Document("$set", new Document("score", score).append("info", info)));
+	}
+	
 	// Update review spam score in reviews collection
 	public void updateReviewScore(String id, double score) {
 		reviewsCol.updateOne(new Document("_id", new ObjectId(id)), new Document("$set", new Document("score", score)));
 	}
 	
+	// Remove review from reviews collection
+	public void removeReview(String id) {
+		reviewsCol.deleteOne(new Document("_id", new ObjectId(id)));
+	}
+	
 	// Update reviewer history score in reviewers collection
 	public void updateReviewerScore(String userid, String score) {
-		reviewersCol.updateOne(new Document("userid", userid), new Document("$set", new Document("score", score)));
+		reviewersCol.updateOne(new Document("userid", userid), new Document("$set", new Document("scores", score)));
 	}
 	
 	// Return all reviews for product ID
@@ -84,35 +94,62 @@ public class MongoDB {
 		return iterable;
 	}
 	
-	// Return all products from products collection
 	public FindIterable<Document> retrieveProductsCollection() {
+		FindIterable<Document> iterable = productsCol.find();
+		
+		return iterable;
+	}
+	
+	// Return all products from products collection with more than 50 reviews
+	public FindIterable<Document> retrieveLargeProductsCollection() {
 		FindIterable<Document> iterable = productsCol.find(new Document("reviews", new Document("$gt", 50)));
-		//FindIterable<Document> iterable = productsCol.find(new Document("mProduct", "1"));
+		
+		return iterable;
+	}
+	
+	// Return all products from products collection with more than 20 and less than 51 reviews
+	public FindIterable<Document> retrieveMediumProductsCollection() {
+		FindIterable<Document> iterable = productsCol.find(new Document("reviews", new Document("$gt", 20).append("$lt", 51)));
+		
+		return iterable;
+	}
+		
+	// Return all products from products collection with more than 5 and less than 21 reviews
+	public FindIterable<Document> retrieveSmallProductsCollection() {
+		FindIterable<Document> iterable = productsCol.find(new Document("reviews", new Document("$gt", 5).append("$lt", 21)));
 		
 		return iterable;
 	}
 	
 	// Return top-K reviews according to assigned spam score
 	public FindIterable<Document> retrieveTopKDocuments(int k) {
-		FindIterable<Document> iterable = reviewsCol.find().sort(new Document("score", -1)).limit(k);
+		FindIterable<Document> iterable = reviewsCol.find().sort(new Document("mscore", -1)).limit(k);
+		
+		return iterable;
+	}
+	
+	// Return spam reviews depending on their score exceeding the threshold
+	public FindIterable<Document> retrieveSpamDocuments() {
+		FindIterable<Document> iterable = reviewsCol.find(new Document("scoretest", new Document("$gt", 3.2)));
 		
 		return iterable;
 	}
 	
 	// Return bottom-K reviews according to assigned spam score
 	public FindIterable<Document> retrieveBottomKDocuments(int k) {
-		FindIterable<Document> iterable = reviewsCol.find(new Document("score", new Document("$gt", 0.0))).sort(new Document("score", 1)).limit(k);
+		FindIterable<Document> iterable = reviewsCol.find(new Document("scoretest", new Document("$gt", 0.0))).sort(new Document("scoretest", 1)).limit(k);
 		
 		return iterable;
 	}
 	
-	
+	/*
 	public void insertMproduct(Document doc) {
 		mProductsCol.insertOne(doc);
 	}
 	
 	public FindIterable<Document> retrieveMproductsCollection() {
-		FindIterable<Document> iterable = mProductsCol.find();
+		//FindIterable<Document> iterable = mProductsCol.find();
+		FindIterable<Document> iterable = productsCol.find(new Document("mProduct", "1"));
 		
 		return iterable;
 	}
@@ -124,5 +161,5 @@ public class MongoDB {
 	public void updateProduct(String pid) {
 		productsCol.updateOne(new Document("pid", pid), new Document("$set", new Document("mProduct", "1")));
 	}
-
+	*/
 }

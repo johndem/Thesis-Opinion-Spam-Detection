@@ -40,7 +40,7 @@ public class SpamDetector {
 	}
 	
 	private void readReviewInput() {
-				
+		
 		FindIterable<Document> iterable = mongo.retrieveProductReviews(productToFilter);
 		
 		iterable.forEach(new Block<Document>() {
@@ -67,49 +67,6 @@ public class SpamDetector {
 			}
 		});
 		
-//		try{
-//		    PrintWriter writer = new PrintWriter("testing.txt", "UTF-8");
-//		    
-//		    for (Review review : reviewList) {
-//		    	System.out.println(review.getReviewerId() + "\t" + review.getTestDate() + "\t" + review.getRating());
-//		    	writer.println(review.getReviewerId() + "\t" + review.getTestDate() + "\t" + review.getRating() + "\t" + review.getReviewText());
-//		    }
-//		    
-//		    writer.close();
-//		} catch (IOException e) {
-//		   // do something
-//		}
-		
-		// Read review and reviewer data for a specific product and store in a respective structures
-//		try (BufferedReader br = new BufferedReader(new FileReader("testing.txt"))) {
-//		    String line;
-//		    
-//		    while ((line = br.readLine()) != null) {
-//		    	// Process the line
-//		    	String[] lineTokens = line.split("\\t");
-//		    	
-//		    	String reviewerId = lineTokens[0];
-//		    	String creationDate = lineTokens[1];
-//		    	double rating = Double.parseDouble(lineTokens[2]);
-//		    	String reviewText = lineTokens[3];
-//		    	
-//		    	
-//		    	// Add review to List
-//		    	Review review = new Review("", reviewerId, rating, creationDate, reviewText);
-//		    	reviewList.add(review);
-//		    	
-//		    	if (!reviewers.containsKey(reviewerId)) { // If encounter reviewer for first time, add to HashMap
-//					reviewers.put(reviewerId, new Reviewer());
-//					reviewers.get(reviewerId).addReview(review);
-//				}
-//				else { // If reviewer already exists, simply add their review
-//					reviewers.get(reviewerId).addReview(review);
-//				}
-//		    }
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 		
 		// Sort reviews in List from oldest to latest
 		Collections.sort(reviewList, new Comparator<Review>() {
@@ -136,8 +93,9 @@ public class SpamDetector {
 					String creationDate = document.get("date").toString();
 					double rating = Double.parseDouble(document.get("rating").toString());
 					String product_id = document.get("pid").toString();
+					String reviewText = document.get("content").toString();
 					
-					entry.getValue().addToHistory(new Review(rating, creationDate, product_id));
+					entry.getValue().addToHistory(new Review(rating, creationDate, product_id, reviewText));
 				}
 			});
 		}
@@ -159,7 +117,7 @@ public class SpamDetector {
 						reviewContents.add(interval.getReviews().get(i).getReviewText());
 						ids.add(interval.getReviews().get(i).getId());
 						
-						// Increment reviewers' bursty review ratio
+						// Increment reviewers' bursty reviews
 						reviewers.get(interval.getReviews().get(i).getReviewerId()).incrementBurstyReviews();
 					}
 						
@@ -192,9 +150,15 @@ public class SpamDetector {
 		}
 		
 		
-		/*
-		// Analyze each review body and assign spam score (Ignored due to evaluation requirements)
+		rd = new RatingDeviation(5, reviewList);
+		
+		// Analyze each individual review piece of information
 		for (Review review : reviewList) {
+			// Analyze review rating deviation
+			review.setRatingDeviation(rd.analyzeRatings(reviewers.get(review.getReviewerId()).getReviews(), review.getRating()));
+			
+			/*
+			// Analyze review body and assign spam score (Ignored due to evaluation requirements)
 			List<String> reviewToBeClassified = new ArrayList<String>();
 			reviewToBeClassified.add(review.getReviewText());
 			// Classify review content with MLP
@@ -204,19 +168,13 @@ public class SpamDetector {
 				review.setContentLabel(1.0);
 			else
 				review.setContentLabel(0.0);
-			
-			//review.calculateReviewSpamScore();
+			*/
 		}
-		*/
 		
 		
-		rd = new RatingDeviation(5, reviewList);
 		
 		// Analyze each reviewer's activity and assign spam score
 		for (HashMap.Entry<String, Reviewer> entry : reviewers.entrySet()) {
-			
-			// Perform rating deviation analysis
-			entry.getValue().setAvgRatingDeviation(rd.analyzeRatings(entry.getValue().getReviews()));
 			
 			// Check similarity between each reviewer's reviews (if created more than one)
 			double reviewerSimilarityScore = 0.0;
@@ -248,21 +206,7 @@ public class SpamDetector {
 			
 			// Examine reviewer's general activity and reviewing history
 			entry.getValue().analyzeReviewingHistory(productToFilter);
-			/*
-			FindIterable<Document> iterable = mongo.retrieveReviewer(entry.getKey());
-			iterable.forEach(new Block<Document>() {
-				@Override
-				public void apply(final Document document) {
-					double score = Double.parseDouble(document.get("score2").toString());
-					
-					if (score == 0.0)
-						mongo.updateReviewerScore(entry.getKey(), String.valueOf(entry.getValue().analyzeReviewingHistory()));
-					else
-						entry.getValue().setHistoryScore(score);
-				}
-			});
-			*/
-			
+	
 			
 			// Measure reviewer's spam score
 			entry.getValue().measureReviewerSpamicity();
@@ -272,29 +216,31 @@ public class SpamDetector {
 		for (Review review : reviewList) {
 			double x = review.calculateReviewSpamScore(reviewers.get(review.getReviewerId()).getSpamicity());
 			//System.out.println(x);
-			mongo.updateReviewScore(review.getMongoId(), x);
+			String info = review.getReviewStats() + reviewers.get(review.getReviewerId()).getReviewingStats();
+			mongo.updateReviewScore(review.getMongoId(), x, info);
 		}
 			
 		
-		/*
-		// Display product filtering results
-		System.out.println("Number of reviews: " + reviewList.size());
-		System.out.println("Number of reviewers: " + reviewers.size());
 		
-		int counter = 1;
-		for (Review review : reviewList) {
-			if (review.getReviewSpamScore() > 3) {
-				System.out.println(counter + ". Score: " + review.getReviewSpamScore() + " (" + review.getTestDate() + ")");
-				System.out.println("Review stats:");
-				review.printReviewStats();
-				System.out.println("Reviewer " + review.getReviewerId() + " stats:");
-				reviewers.get(review.getReviewerId()).printReviewingStats();
-				System.out.println("------------------------------------------------------");
-				counter++;
-			}
-			
-		}
-		*/
+//		// Display product filtering results
+//		System.out.println("Number of reviews: " + reviewList.size());
+//		System.out.println("Number of reviewers: " + reviewers.size());
+//		System.out.println("Mean rating: " + rd.getMeanRating());
+//		
+//		int counter = 1;
+//		for (Review review : reviewList) {
+//			if (review.getReviewSpamScore() > 3.5) {
+//				System.out.println(counter + ". Score: " + review.getReviewSpamScore() + " (" + review.getTestDate() + ")");
+//				System.out.println("Review stats:");
+//				review.printReviewStats();
+//				System.out.println("Reviewer " + review.getReviewerId() + " stats:");
+//				reviewers.get(review.getReviewerId()).printReviewingStats();
+//				System.out.println("------------------------------------------------------");
+//				counter++;
+//			}
+//		}
+		
+		
 	}	
 
 }

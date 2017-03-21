@@ -107,6 +107,46 @@ public class DatasetInfo {
 	}
 	
 	public void measureTotalReviews() {
+		FindIterable<Document> iterable = mongo.retrieveSmallProductsCollection();
+		
+		iterable.forEach(new Block<Document>() {
+			@Override
+			public void apply(final Document document) {
+				int reviews = Integer.parseInt(document.get("reviews").toString());
+				counter += reviews;
+			}
+		});
+		
+		System.out.println("Total amount of reviews (S): " + counter);
+		
+		counter = 0;
+		FindIterable<Document> iter = mongo.retrieveMediumProductsCollection();
+		
+		iter.forEach(new Block<Document>() {
+			@Override
+			public void apply(final Document document) {
+				int reviews = Integer.parseInt(document.get("reviews").toString());
+				counter += reviews;
+			}
+		});
+		
+		System.out.println("Total amount of reviews (M): " + counter);
+		
+		counter = 0;
+		FindIterable<Document> it = mongo.retrieveLargeProductsCollection();
+		
+		it.forEach(new Block<Document>() {
+			@Override
+			public void apply(final Document document) {
+				int reviews = Integer.parseInt(document.get("reviews").toString());
+				counter += reviews;
+			}
+		});
+		
+		System.out.println("Total amount of reviews (L): " + counter);
+	}
+	
+	public void measureReviews() {
 		FindIterable<Document> iterable = mongo.retrieveProductsCollection();
 		
 		iterable.forEach(new Block<Document>() {
@@ -118,6 +158,22 @@ public class DatasetInfo {
 		});
 		
 		System.out.println("Total amount of reviews: " + counter);
+	}
+	
+	public void measureTotalmReviews() {
+		FindIterable<Document> iterable = mongo.retrieveProductsCollection();
+		
+		iterable.forEach(new Block<Document>() {
+			@Override
+			public void apply(final Document document) {
+				int reviews = Integer.parseInt(document.get("reviews").toString());
+				String mProduct = document.get("mProduct").toString();
+				if (mProduct.equals("1") && reviews > 3)
+					counter += reviews;
+			}
+		});
+		
+		System.out.println("Total amount of M reviews: " + counter);
 	}
 
 }

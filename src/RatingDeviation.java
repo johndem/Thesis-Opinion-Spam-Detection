@@ -24,9 +24,8 @@ public class RatingDeviation {
 		return meanRating / numOfReviews;
 	}
 	
-	public double analyzeRatings(List<Review> reviews) {
-		//System.out.println("Overall mean rating on this set of " + numOfReviews + " reviews is: " + meanRating);
-		
+	public double analyzeRatings(List<Review> reviews, double score) {
+		/*
 		double totalNormDeviation = 0.0;
 		double newMeanRating = meanRating;
 		for (Review review : reviews) {
@@ -46,8 +45,23 @@ public class RatingDeviation {
 			
 			totalNormDeviation = totalNormDeviation / reviews.size();
 		}
+		*/
 		
-		return totalNormDeviation;
+		double normalDeviation = 0.0;
+		double newMeanRating = meanRating;
+		
+		for (Review review : reviews) {
+			newMeanRating = newMeanRating - review.getRating();
+		}
+		
+		if (numOfReviews - reviews.size() != 0) {
+			newMeanRating = newMeanRating / (numOfReviews - reviews.size());
+			
+			double deviation = Math.abs(newMeanRating - score);
+			normalDeviation = deviation / (scale-1);
+		}
+			
+		return normalDeviation; // Instead of total
 	}
 
 }

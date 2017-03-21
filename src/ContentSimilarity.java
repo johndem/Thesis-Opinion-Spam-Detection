@@ -101,7 +101,7 @@ public class ContentSimilarity {
 			vectors.add(vec);
 		}
 		
-		// Create vector for each document based on TFxIDF scores
+		// Create vector for each document based on TF scores
 		for (String word : bagOfWords) {
 			for (int i = 0; i < docs.size(); i++) {
 				double value = 0.0;
