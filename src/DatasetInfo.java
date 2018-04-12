@@ -1,11 +1,22 @@
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import org.bson.Document;
 
 import com.mongodb.Block;
 import com.mongodb.client.FindIterable;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.chart.ChartUtilities;
 
 public class DatasetInfo {
 	
@@ -158,6 +169,96 @@ public class DatasetInfo {
 		});
 		
 		System.out.println("Total amount of reviews: " + counter);
+	}
+	
+	public void countReviewers() {
+		FindIterable<Document> iterable = mongo.retrieveAnnotatedReviews().noCursorTimeout(true);
+		
+		HashSet<String> reviewerSet = new HashSet<String>();
+		
+		iterable.forEach(new Block<Document>() {
+			@Override
+			public void apply(final Document document) {
+				String reviewerId = document.get("userid").toString();
+				reviewerSet.add(reviewerId);
+			}
+		});
+		
+		System.out.println("Total amount of reviewers: " + reviewerSet.size());
+	}
+	
+	public void createScoreChart() throws IOException {//max=46.7
+		FindIterable<Document> iterable = mongo.retrieveSpamDocuments().noCursorTimeout(true);
+		
+		ArrayList<Integer> scoreLeft = new ArrayList<Integer>();
+		ArrayList<Integer> scoreRight = new ArrayList<Integer>();
+		ArrayList<Integer> scoreDistribution = new ArrayList<Integer>();
+		
+		for (int i = 3; i < 47; i=i+2) {
+			scoreLeft.add(i);
+			scoreRight.add(i+2);
+			scoreDistribution.add(0);
+			//System.out.println(i);
+		}
+		
+		iterable.forEach(new Block<Document>() {
+			@Override
+			public void apply(final Document document) {
+				double score = Double.parseDouble(document.get("score2").toString());
+				
+				for (int i = 0; i < scoreLeft.size(); i++) {
+					if (score >= scoreLeft.get(i) && score < scoreRight.get(i)) {
+						int sum = scoreDistribution.get(i) + 1;
+						scoreDistribution.set(i, sum);
+						break;
+					}
+				}
+			}
+		});
+		
+		
+		final DefaultCategoryDataset dataset = new DefaultCategoryDataset( );
+		
+		for (int i = 0; i < scoreLeft.size(); i++) {
+			String label = String.valueOf(scoreLeft.get(i)) + "-" + String.valueOf(scoreRight.get(i));
+			dataset.addValue( scoreDistribution.get(i) , "Spam Score" ,  label );
+			System.out.println(label + " -> " + scoreDistribution.get(i));
+		}
+
+	    JFreeChart barChart = ChartFactory.createBarChart("", "Range", "Sum", dataset,PlotOrientation.VERTICAL, true, false, false);
+	         
+	    int width = 640;    /* Width of the image */
+	    int height = 480;   /* Height of the image */ 
+	    File BarChart = new File( "BarChart.jpeg" ); 
+	    ChartUtilities.saveChartAsJPEG( BarChart , barChart , width , height );
+	}
+	
+	public void findTopReviews() {
+		HashMap<String, String> topReviews = new HashMap<String, String>();
+		HashMap<String, Double> topReviewScores = new HashMap<String, Double>();
+		
+		FindIterable<Document> iter = mongo.retrieveTopKDocuments(1000).noCursorTimeout(true);
+		iter.forEach(new Block<Document>() {
+			@Override
+			public void apply(final Document document) {
+				String userid = document.get("userid").toString();
+				String info = document.get("info3").toString();
+				double score = Double.parseDouble(document.get("score2").toString());
+				
+				if (topReviews.size() < 10 && !topReviews.containsKey(userid)) {
+					topReviews.put(userid, info);
+					topReviewScores.put(userid, score);
+				}
+			}
+					
+		});
+		
+		for (String key : topReviews.keySet()) {
+			System.out.println(topReviews.get(key));
+			System.out.println(topReviewScores.get(key));
+			System.out.println("-------------------------------------------");
+		}
+			
 	}
 	
 	public void measureTotalmReviews() {

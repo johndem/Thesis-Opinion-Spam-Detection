@@ -100,7 +100,8 @@ public class Review {
 	}
 	
 	public double calculateReviewSpamScore(double reviewerScore) {
-		reviewSpamScore = 0.5 * contentLabel + 2 * contentSimilarityInBurst + 1 * ratingDeviation + reviewerScore;
+		//reviewSpamScore = 0.5 * contentLabel + 1 * ratingDeviation + 2 * contentSimilarityInBurst + reviewerScore;
+		reviewSpamScore = 0.5 * contentLabel + 1 * ratingDeviation + reviewerScore;
 		return reviewSpamScore;
 	}
 	
@@ -119,8 +120,8 @@ public class Review {
 	}
 	
 	public String getReviewStats() {
-		return "CSB: " + contentSimilarityInBurst + " (" + 2 * contentSimilarityInBurst + ")" + "\n" +
-			"Rating Deviation: " + ratingDeviation + " (" + 1 * ratingDeviation + ")" + "\n";
+		return "CSB: " + contentSimilarityInBurst + " (" + 2 * contentSimilarityInBurst + ")" + "/" +
+			"RD: " + ratingDeviation + " (" + 1 * ratingDeviation + ")" + "/";
 	}
 
 }

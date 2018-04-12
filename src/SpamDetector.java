@@ -63,7 +63,7 @@ public class SpamDetector {
 				else { // If reviewer already exists, simply add their review
 					reviewers.get(reviewerId).addReview(review);
 				}
-				
+
 			}
 		});
 		
@@ -110,6 +110,7 @@ public class SpamDetector {
 		if (intervals.size() > 2) {
 			// Check similarity between reviews of a burst
 			for (Interval interval : intervals) {
+				//System.out.println(interval.getReviewSum());
 				if (interval.isSuspicious()) {
 					List<String> reviewContents = new ArrayList<String>();
 					List<Integer> ids = new ArrayList<Integer>();
@@ -216,8 +217,11 @@ public class SpamDetector {
 		for (Review review : reviewList) {
 			double x = review.calculateReviewSpamScore(reviewers.get(review.getReviewerId()).getSpamicity());
 			//System.out.println(x);
-			String info = review.getReviewStats() + reviewers.get(review.getReviewerId()).getReviewingStats();
-			mongo.updateReviewScore(review.getMongoId(), x, info);
+			//String info = review.getReviewStats() + reviewers.get(review.getReviewerId()).getReviewingStats();
+			mongo.updateReviewScore(review.getMongoId(), x);
+			//String info2 = reviewers.get(review.getReviewerId()).getPenalty();
+			//String info3 = review.getReviewStats() + reviewers.get(review.getReviewerId()).getReviewingStats();
+			//mongo.updateReviewInfos(review.getMongoId(), info2, info3);
 		}
 			
 		

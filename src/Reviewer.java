@@ -94,7 +94,8 @@ public class Reviewer {
 		// Calculate duration between reviewer's first and last review
 		int daysOfActivity = (int) ChronoUnit.DAYS.between(reviewingHistory.get(0).getDate(), reviewingHistory.get(reviewingHistory.size()-1).getDate());
 		if (reviews.size() > 5 && daysOfActivity < normalActivityDuration) {
-			historyBurstiness = 1.0;
+			//historyBurstiness = 1.0;
+			historyBurstiness = 1.0 - (double) daysOfActivity / normalActivityDuration;
 		}
 		
 		//System.out.println("Reviewer has " + daysOfActivity + " days of activity.");
@@ -198,14 +199,20 @@ public class Reviewer {
 		return historyScore;
 	}
 	
+	public String getPenalty() {
+		return String.valueOf(penalty);
+	}
+	
 	public void measureReviewerSpamicity() {
 		if (totalBurstyReviews >= 3)
-			burstyActivity = 1.0;
+			burstyActivity = 1;
 		
 		if (reviews.size() > 1 && reviewContentSimilarity > 0.99)
 			penalty += 1.0;
 		
-		spamicity = 1.5 * reviewContentSimilarity + burstyActivity + 0.5 * reviews.size() + historyScore + penalty; // 0.5 * avgRatingDeviation + 
+		//spamicity = 1.5 * reviewContentSimilarity + 0.33 * reviews.size() + 1 * burstyActivity + historyScore;
+		//spamicity = 1.5 * reviewContentSimilarity + 0.33 * reviews.size() + 1 * burstyActivity;
+		spamicity = 1.5 * reviewContentSimilarity + 0.33 * reviews.size();
 	}
 	
 	public double getSpamicity() {
@@ -224,14 +231,14 @@ public class Reviewer {
 	
 	public String getReviewingStats() {
 		return  
-				"Review Content Similarity: " + reviewContentSimilarity + " (" + 1.5 * reviewContentSimilarity + ")" + "\n" +
-				"Number of Reviews: " + reviews.size() + " (" + 0.5 * reviews.size() + ")" + "\n" +
-				"Bursty Activity on product: " + burstyActivity + "\n" +
-				"(H) Overall Bursty Reviewing: " + historyBurstiness + "\n" + 
-				"(H) Average Number of Reviews per Product: " + averateReviewsPerProduct + " (" + 0.5 * averateReviewsPerProduct + ")" + "\n" +
-				"(H) Extreme Rating Ratio: " + exRatingRatio + " (" + 0.5 * exRatingRatio + ")" + "\n" + 
-				"H: " + historyScore + " (" + reviewingHistory.size() + " - " + (reviewingHistory.size()-reviews.size()) + ")" + "\n" +
-				"Penalty: " + penalty;
+				"CS: " + reviewContentSimilarity + " (" + 1.5 * reviewContentSimilarity + ")" + "/" +
+				"NR: " + reviews.size() + " (" + 0.33 * reviews.size() + ")" + "/" +
+				"BuA: " + burstyActivity + "/" +
+				"(H) RBu: " + historyBurstiness + "/" + 
+				"(H) AvgP: " + averateReviewsPerProduct + " (" + 0.5 * averateReviewsPerProduct + ")" + "/" +
+				"(H) EXR: " + exRatingRatio + " (" + 0.5 * exRatingRatio + ")" + "/" + 
+				"H: " + historyScore + " (" + reviewingHistory.size() + " - " + (reviewingHistory.size()-reviews.size()) + ")" + "/" +
+				"DUP: " + penalty;
 	}
 
 }
